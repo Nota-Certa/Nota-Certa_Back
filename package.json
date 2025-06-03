@@ -22,7 +22,8 @@
     "build:dashboard": "nest build apps/dashboard",
     "build:notas-fiscais": "nest build apps/notas-fiscais",
     "build:notificacoes": "nest build apps/notificacoes",
-    "build:usuario": "nest build apps/usuario"
+    "build:usuario": "nest build apps/usuario",
+    "build:pagamento": "nest build apps/pagamento"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
@@ -30,12 +31,15 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.2",
     "@nestjs/platform-express": "^11.1.2",
+    "@nestjs/typeorm": "^11.0.0",
     "cache-manager": "^6.4.3",
     "cache-manager-redis-store": "^3.0.1",
     "nota-certa": "file:",
+    "pg": "^8.16.0",
     "redis": "^5.5.5",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.24"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
