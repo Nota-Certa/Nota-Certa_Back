@@ -15,8 +15,10 @@ describe('PagamentoController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(pagamentoController.getHello()).toBe('Hello World!');
+    it('should return "Pagamento realizado com sucesso!!!"', () => {
+      expect(pagamentoController.criarPagamento).toBe(
+        'Pagamento realizado com sucesso!!!',
+      );
     });
   });
 });
