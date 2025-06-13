@@ -1,78 +1,71 @@
+# Define um modelo reutilizável com as configurações comuns a todos os serviços da aplicação
+x-app-base: &app-base
+  build:
+    context: .
+  environment:
+    - PORT=3000
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+  depends_on:
+    - redis
+
 services:
   autenticacao:
+    <<: *app-base # Herda todas as configurações do modelo &app-base
     build:
-      context: .
       args:
         APP_NAME: autenticacao
     ports:
-      - '3000:3000'
-    environment:
-      - PORT=3000
-    depends_on:
-      - redis
+      - "3000:3000"
 
   dashboard:
+    <<: *app-base
     build:
-      context: .
       args:
         APP_NAME: dashboard
     ports:
-      - '3001:3000'
-    environment:
-      - PORT=3000
-    depends_on:
-      - redis
+      - "3001:3000"
 
-  notas_fiscais:
+  notas-fiscais:
+    <<: *app-base
     build:
-      context: .
       args:
         APP_NAME: notas-fiscais
     ports:
-      - '3002:3000'
-    environment:
-      - PORT=3000
-    depends_on:
-      - redis
+      - "3002:3000"
 
   notificacoes:
+    <<: *app-base
     build:
-      context: .
       args:
         APP_NAME: notificacoes
     ports:
-      - '3003:3000'
-    environment:
-      - PORT=3000
-    depends_on:
-      - redis
+      - "3003:3000"
 
   usuario:
+    <<: *app-base
     build:
-      context: .
       args:
         APP_NAME: usuario
     ports:
-      - '3004:3000'
-    depends_on:
-      - redis
+      - "3004:3000"
 
   redis:
-    image: redis:7
+    image: "redis:7"
     ports:
       - '6379:6379'
-postgres:
-  image: postgres:16
-  container_name: postgres_multiservice
-  restart: always
-  ports:
-    - '5432:5432'
-  environment:
-    POSTGRES_USER: admin
-    POSTGRES_PASSWORD: admin
-  volumes:
-    - postgres_data:/var/lib/postgresql/data
-    - ./init:/docker-entrypoint-initdb.d
+  postgres:
+    image: postgres:16
+    container_name: postgres_multiservice
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
 
 volumes:
   postgres_data:
