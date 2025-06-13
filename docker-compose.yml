@@ -56,6 +56,20 @@ services:
       - "3004:3000"
     depends_on:
       - redis
+  
+  pagamento:
+    build:
+      context: .
+      args:
+        APP_NAME: pagamento
+    ports:
+      - "4005:3000"
+    env_file:
+      - .env.development.local
+    environment:
+      - NODE_ENV=development.local
+    depends_on:
+      - postgres
 
   redis:
     image: redis:7
