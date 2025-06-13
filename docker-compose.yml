@@ -53,4 +53,19 @@ services:
   redis:
     image: "redis:7"
     ports:
-      - "6379:6379"
+      - '6379:6379'
+  postgres:
+    image: postgres:16
+    container_name: postgres_multiservice
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+
+volumes:
+  postgres_data:
