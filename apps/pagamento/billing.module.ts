@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
 import { Assinatura } from './assinatura.entity';
@@ -7,17 +8,19 @@ import { Plano } from './plano.entity';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'development.local' ? '.env.development.local' : '.env',
+    }),
     TypeOrmModule.forRoot({
-        // configs do type orm pra conecter com o db, tem que mudar pras configs dos de vcs se for rodar local
-        // ou mudar pras configs do docker se for rodar no docker
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'your_db_user',
-      password: 'your_db_password',
-      database: 'your_db_name',
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT ?? '5432', 10),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME_PAYMENT, //
       entities: [Assinatura, Plano],
-      synchronize: true, // eu acho que isso deve ser false qnd der deploy
+      synchronize: true, // achoq tem q mudar pra false no prod
     }),
     TypeOrmModule.forFeature([Assinatura, Plano]),
   ],
