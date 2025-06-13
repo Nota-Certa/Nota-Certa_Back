@@ -1,38 +1,69 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Assinatura } from './assinatura.entity';
+import { Plano } from './plano.entity';
 
 @Injectable()
 export class BillingService {
+  constructor(
+    @InjectRepository(Assinatura)
+    private readonly assinaturaRepo: Repository<Assinatura>,
+    @InjectRepository(Plano)
+    private readonly planoRepo: Repository<Plano>,
+  ) {}
+
   // CRUD de Assinaturas
-  findAllAssinaturas() {
-    return 'List of assinaturas';
+  async findAllAssinaturas() {
+    return this.assinaturaRepo.find();
   }
-  findAssinaturaById(id: string) {
-    return `Assinatura ${id}`;
+
+  async findAssinaturaById(id: string) {
+    const assinatura = await this.assinaturaRepo.findOne({ where: { id } });
+    if (!assinatura) throw new NotFoundException('Assinatura not found');
+    return assinatura;
   }
-  createAssinatura(dto: any) {
-    return 'Created assinatura';
+
+  async createAssinatura(dto: Partial<Assinatura>) {
+    const assinatura = this.assinaturaRepo.create(dto);
+    return this.assinaturaRepo.save(assinatura);
   }
-  updateAssinatura(id: string, dto: any) {
-    return `Updated assinatura ${id}`;
+
+  async updateAssinatura(id: string, dto: Partial<Assinatura>) {
+    await this.assinaturaRepo.update(id, dto);
+    return this.findAssinaturaById(id);
   }
-  deleteAssinatura(id: string) {
-    return `Deleted assinatura ${id}`;
+
+  async deleteAssinatura(id: string) {
+    const result = await this.assinaturaRepo.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Assinatura not found');
+    return { deleted: true };
   }
 
   // CRUD de Planos
-  findAllPlanos() {
-    return 'List of planos';
+  async findAllPlanos() {
+    return this.planoRepo.find();
   }
-  findPlanoById(id: string) {
-    return `Plano ${id}`;
+
+  async findPlanoById(id: string) {
+    const plano = await this.planoRepo.findOne({ where: { id } });
+    if (!plano) throw new NotFoundException('Plano not found');
+    return plano;
   }
-  createPlano(dto: any) {
-    return 'Created plano';
+
+  async createPlano(dto: Partial<Plano>) {
+    const plano = this.planoRepo.create(dto);
+    return this.planoRepo.save(plano);
   }
-  updatePlano(id: string, dto: any) {
-    return `Updated plano ${id}`;
+
+  async updatePlano(id: string, dto: Partial<Plano>) {
+    await this.planoRepo.update(id, dto);
+    return this.findPlanoById(id);
   }
-  deletePlano(id: string) {
-    return `Deleted plano ${id}`;
+
+  async deletePlano(id: string) {
+    const result = await this.planoRepo.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Plano not found');
+    return { deleted: true };
   }
 }
