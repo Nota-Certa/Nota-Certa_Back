@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { ClienteFinal } from './clientes_finais.entity';
+import { StatusNotaFiscal } from './status.enum';
 
 @Entity('notas_fiscais')
 export class NotaFiscal {
@@ -23,8 +24,12 @@ export class NotaFiscal {
   @JoinColumn({ name: 'cliente_id' })
   cliente: ClienteFinal;
 
-  @Column('text')
-  status: string;
+  @Column({
+    type: 'enum',
+    enum: StatusNotaFiscal,
+    default: StatusNotaFiscal.PENDENTE,
+  })
+  status: StatusNotaFiscal;
 
   @Column({ type: 'timestamp without time zone' })
   data_emissao: Date;
