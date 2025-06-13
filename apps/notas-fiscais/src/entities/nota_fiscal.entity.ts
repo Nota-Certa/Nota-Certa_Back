@@ -8,8 +8,8 @@ import {
 } from 'typeorm';
 import { ClienteFinal } from './clientes_finais.entity';
 
-@Entity('invoices')
-export class Invoice {
+@Entity('notas_fiscais')
+export class NotaFiscal {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

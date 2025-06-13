@@ -5,19 +5,19 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Invoice } from './invoices.entity';
+import { NotaFiscal } from './nota_fiscal.entity';
 
-@Entity('invoice_itens')
-export class InvoiceItem {
+@Entity('nota_fiscal_itens')
+export class NotaFiscalItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column('uuid')
-  invoice_id: string;
+  nota_fiscal_id: string;
 
-  @ManyToOne(() => Invoice)
-  @JoinColumn({ name: 'invoice_id' })
-  invoice: Invoice;
+  @ManyToOne(() => NotaFiscal)
+  @JoinColumn({ name: 'nota_fiscal_id' })
+  nota_fiscal: NotaFiscal;
 
   @Column('text')
   descricao: string;

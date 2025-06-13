@@ -8,6 +8,8 @@ services:
       - '3000:3000'
     environment:
       - PORT=3000
+    env_file:
+      - .env.development.local
     depends_on:
       - redis
 
@@ -20,6 +22,8 @@ services:
       - '3001:3000'
     environment:
       - PORT=3000
+    env_file:
+      - .env.development.local
     depends_on:
       - redis
 
@@ -32,6 +36,8 @@ services:
       - '3002:3000'
     environment:
       - PORT=3000
+    env_file:
+      - .env.development.local
     depends_on:
       - redis
 
@@ -54,6 +60,8 @@ services:
         APP_NAME: usuario
     ports:
       - '3004:3000'
+    env_file:
+      - .env.development.local
     depends_on:
       - redis
 
