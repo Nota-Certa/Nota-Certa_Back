@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Define um modelo reutilizável com as configurações comuns a todos os serviços da aplicação
 x-app-base: &app-base
   build:
@@ -46,6 +44,14 @@ services:
         APP_NAME: notificacoes
     ports:
       - "3003:3000"
+
+  pagamento:
+    <<: *app-base
+    build:
+      args:
+        APP_NAME: pagamento
+    ports:
+      - "3005:3000"
 
   usuario:
     <<: *app-base

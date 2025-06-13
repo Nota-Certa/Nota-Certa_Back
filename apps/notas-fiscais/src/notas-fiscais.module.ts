@@ -21,7 +21,10 @@ import { ConfigModule } from '@nestjs/config';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME_NF,
       entities: [NotaFiscal, NotaFiscalItem, ClienteFinal],
-      synchronize: true,
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN === 'true',
+      migrationsTableName: 'migrations',
+      synchronize: true,  // DESATIVAR APÓS O DESENVOLVIMENTO
     }),
     TypeOrmModule.forFeature([NotaFiscal, NotaFiscalItem, ClienteFinal])
   ],
