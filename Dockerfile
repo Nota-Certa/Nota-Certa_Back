@@ -1,30 +1,40 @@
-# Etapa 1: build da aplicação
-FROM node:18 AS builder
+# Comeco de etapa de build
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copia package.json e instala dependências
+# Copia package.json e instala dependencias.
+
 COPY package*.json ./
 RUN npm install
 
-# Copia o restante da aplicação
+# Copia o resto
 COPY . .
 
-# Define o nome da aplicação a ser construída
+# Define nome da aplicacao
 ARG APP_NAME
 RUN npm run build:$APP_NAME
 
-# Etapa 2: imagem final para produção
-FROM node:18-alpine
+# Etapa de construcao de imagem final para producao
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Copia somente arquivos necessários
-COPY package*.json ./
-RUN npm install --omit=dev
-
 ARG APP_NAME
-COPY --from=builder /app/dist/apps/${APP_NAME} ./dist
+ENV APP_NAME=${APP_NAME}
+
+# Copiar os arquivos de definicao de pacotes do builder
+COPY --from=builder /app/package*.json ./
+
+# Instalar so as dependencias de produção
+RUN npm ci --omit=dev
+
+# Copie o codigo compilado da aplicacao definida por APP_NAME
+COPY --from=builder /app/dist/${APP_NAME} ./dist/${APP_NAME}
 
 EXPOSE 3000
-CMD ["node", "dist/main"]
+
+
+CMD node dist/${APP_NAME}/src/main.js
+
+
