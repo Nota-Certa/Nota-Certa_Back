@@ -2,23 +2,30 @@ import { Module } from '@nestjs/common';
 import { NotasFiscaisController } from './notas-fiscais.controller';
 import { NotasFiscaisService } from './notas-fiscais.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClienteFinal } from './entities/clientes_finais.entity';
-import { Invoice } from './entities/invoices.entity';
-import { InvoiceItem } from './entities/invoice_itens.entity';
+import { NotaFiscal } from './entities/nota-fiscal.entity';
+import { NotaFiscalItem } from './entities/nota-fiscal-itens.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'postgres',
-      port: 5432,
-      username: 'admin',
-      password: 'admin',
-      database: 'notas_fiscais',
-      entities: [ClienteFinal, Invoice, InvoiceItem],
-      synchronize: true, // ⚠️ Apenas para dev (não usar em produção)
+      host: process.env.DB_HOST,
+      port: +(process.env.DB_PORT ?? 5432),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME_NF,
+      entities: [NotaFiscal, NotaFiscalItem],
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN === 'true',
+      migrationsTableName: 'migrations',
+      synchronize: false
     }),
-    TypeOrmModule.forFeature([ClienteFinal, Invoice, InvoiceItem]),
+    TypeOrmModule.forFeature([NotaFiscal, NotaFiscalItem])
   ],
   controllers: [NotasFiscaisController],
   providers: [NotasFiscaisService],
