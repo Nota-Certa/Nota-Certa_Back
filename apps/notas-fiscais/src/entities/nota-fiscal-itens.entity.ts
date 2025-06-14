@@ -5,7 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { NotaFiscal } from './nota_fiscal.entity';
+import { NotaFiscal } from './nota-fiscal.entity';
 
 @Entity('nota_fiscal_itens')
 export class NotaFiscalItem {

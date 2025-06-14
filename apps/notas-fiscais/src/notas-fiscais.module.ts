@@ -2,9 +2,8 @@ import { Module } from '@nestjs/common';
 import { NotasFiscaisController } from './notas-fiscais.controller';
 import { NotasFiscaisService } from './notas-fiscais.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClienteFinal } from './entities/clientes_finais.entity';
-import { NotaFiscal } from './entities/nota_fiscal.entity';
-import { NotaFiscalItem } from './entities/nota_fiscal_itens.entity';
+import { NotaFiscal } from './entities/nota-fiscal.entity';
+import { NotaFiscalItem } from './entities/nota-fiscal-itens.entity';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -20,13 +19,13 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME_NF,
-      entities: [NotaFiscal, NotaFiscalItem, ClienteFinal],
+      entities: [NotaFiscal, NotaFiscalItem],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN === 'true',
       migrationsTableName: 'migrations',
-      synchronize: true,  // DESATIVAR APÓS O DESENVOLVIMENTO
+      synchronize: false
     }),
-    TypeOrmModule.forFeature([NotaFiscal, NotaFiscalItem, ClienteFinal])
+    TypeOrmModule.forFeature([NotaFiscal, NotaFiscalItem])
   ],
   controllers: [NotasFiscaisController],
   providers: [NotasFiscaisService],

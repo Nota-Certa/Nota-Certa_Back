@@ -23,7 +23,17 @@
     "build:notas-fiscais": "nest build apps/notas-fiscais",
     "build:notificacoes": "nest build apps/notificacoes",
     "build:usuario": "nest build apps/usuario",
-    "build:pagamento": "nest build apps/pagamento"
+    "build:pagamento": "nest build apps/pagamento",
+    "migrate:gen:notas":     "typeorm-ts-node-commonjs migration:generate --dataSource apps/notas-fiscais/src/data-source.ts",
+    "migrate:run:notas":     "typeorm-ts-node-commonjs migration:run      --dataSource apps/notas-fiscais/src/data-source.ts",
+    "migrate:gen:pagamento": "typeorm-ts-node-commonjs migration:generate --dataSource apps/pagamento/src/data-source.ts",
+    "migrate:run:pagamento": "typeorm-ts-node-commonjs migration:run      --dataSource apps/pagamento/src/data-source.ts",
+    "migrate:gen:usuario":   "typeorm-ts-node-commonjs migration:generate --dataSource apps/usuario/src/data-source.ts",
+    "migrate:run:usuario":   "typeorm-ts-node-commonjs migration:run      --dataSource apps/usuario/src/data-source.ts",
+    "migrate:gen:dashboard": "typeorm-ts-node-commonjs migration:generate --dataSource apps/dashboard/src/data-source.ts",
+    "migrate:run:dashboard": "typeorm-ts-node-commonjs migration:run      --dataSource apps/dashboard/src/data-source.ts",
+    "migrate:gen:notificacoes": "typeorm-ts-node-commonjs migration:generate --dataSource apps/notificacoes/src/data-source.ts",
+    "migrate:run:notificacoes": "typeorm-ts-node-commonjs migration:run      --dataSource apps/notificacoes/src/data-source.ts"
   },
   "dependencies": {
     "@nestjs/cache-manager": "^3.0.1",
@@ -68,6 +78,7 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "typeorm-ts-node-commonjs": "^0.3.20",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },

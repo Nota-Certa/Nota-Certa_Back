@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotaFiscal } from './entities/nota_fiscal.entity';
-import { NotaFiscalItem } from './entities/nota_fiscal_itens.entity';
+import { NotaFiscal } from './entities/nota-fiscal.entity';
+import { NotaFiscalItem } from './entities/nota-fiscal-itens.entity';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
 

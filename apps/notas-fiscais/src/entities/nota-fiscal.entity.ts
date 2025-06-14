@@ -3,11 +3,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne,
-  JoinColumn,
 } from 'typeorm';
-import { ClienteFinal } from './clientes_finais.entity';
 import { StatusNotaFiscal } from './status.enum';
+import { TipoPessoa } from './tipo-pessoa.enum';
 
 @Entity('notas_fiscais')
 export class NotaFiscal {
@@ -17,12 +15,19 @@ export class NotaFiscal {
   @Column('uuid')
   empresa_id: string;
 
-  @Column('uuid')
-  cliente_id: string;
+  // CPF (11) ou CNPJ (14) — no banco varchar(14)
+  @Column({ type: 'character varying', length: 14 })
+  documento: string;
 
-  @ManyToOne(() => ClienteFinal)
-  @JoinColumn({ name: 'cliente_id' })
-  cliente: ClienteFinal;
+  @Column('varchar', { length: 255 })
+  nome_razao_social: string;
+
+  // F (Física) ou J (Jurídica)
+  @Column({
+    type: 'enum',
+    enum: TipoPessoa,
+  })
+  tipo_pessoa: TipoPessoa;
 
   @Column({
     type: 'enum',

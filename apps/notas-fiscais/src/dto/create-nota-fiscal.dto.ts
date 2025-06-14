@@ -1,48 +1,40 @@
 import {
-  IsUUID,
-  IsDateString,
-  IsString,
-  IsNotEmpty,
-  IsNumber,
-  Min,
-  ValidateNested,
-  IsArray,
-  ArrayMinSize,
   IsEnum,
+  IsNotEmpty,
+  IsString,
+  Length,
+  IsDateString,
+  ValidateNested,
+  IsArray, ArrayMinSize,
+  IsOptional
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { TipoPessoa } from '../entities/tipo-pessoa.enum';
 import { StatusNotaFiscal } from '../entities/status.enum';
-
-export class CreateNotaFiscalItemDto {
-  @IsString()
-  @IsNotEmpty()
-  descricao: string;
-
-  @IsNumber()
-  @Min(1)
-  quantidade: number;
-
-  @IsNumber()
-  @Min(0)
-  valor_unitario: number;
-
-  // impostos pode ser um JSON qualquer
-  @IsNotEmpty()
-  impostos: any;
-}
+import { Type } from 'class-transformer';
+import { CreateNotaFiscalItemDto } from './create-nota-fiscal-item.dto';
 
 export class CreateNotaFiscalDto {
-  @IsUUID()
-  cliente_id: string;
+  @IsEnum(TipoPessoa)
+  tipo_pessoa: TipoPessoa;
+
+  // aceita 11 ou 14 dígitos
+  @IsString()
+  @Length(11, 14)
+  documento: string;
+
+  @IsString()
+  @IsNotEmpty()
+  nome_razao_social: string;
+
+  @IsOptional()
+  @IsEnum(StatusNotaFiscal)
+  status?: StatusNotaFiscal;
 
   @IsDateString()
   data_emissao: string;
 
   @IsDateString()
   data_vencimento: string;
-
-  @IsEnum(StatusNotaFiscal)
-  status?: StatusNotaFiscal;
 
   @IsArray()
   @ArrayMinSize(1)
