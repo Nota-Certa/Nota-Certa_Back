@@ -7,6 +7,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Empresa } from './empresas.entity';
+import { IsEnum } from 'class-validator';
+import { RoleUsuarios } from './role.enum';
 
 @Entity('usuarios')
 export class Usuario {
@@ -29,10 +31,17 @@ export class Usuario {
   @Column('text')
   senha_hash: string;
 
-  @Column('text')
-  role: string;
+  @Column({
+      type: 'enum',
+      enum: RoleUsuarios,
+      default: RoleUsuarios.FUNCIONARIO,
+    })
+  role: RoleUsuarios;
 
-  @Column('boolean')
+  @Column({
+   type: 'boolean',
+   default: true
+  })
   ativo: boolean;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
