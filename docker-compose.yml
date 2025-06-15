@@ -2,12 +2,15 @@
 x-app-base: &app-base
   build:
     context: .
+  env_file:
+    - .env.development.local
   environment:
     - PORT=3000
     - REDIS_HOST=redis
     - REDIS_PORT=6379
   depends_on:
     - redis
+    - postgres
 
 services:
   autenticacao:
@@ -16,7 +19,7 @@ services:
       args:
         APP_NAME: autenticacao
     ports:
-      - "3000:3000"
+      - '3000:3000'
 
   dashboard:
     <<: *app-base
@@ -41,6 +44,14 @@ services:
         APP_NAME: notificacoes
     ports:
       - "3003:3000"
+
+  pagamento:
+    <<: *app-base
+    build:
+      args:
+        APP_NAME: pagamento
+    ports:
+      - "3005:3000"
 
   usuario:
     <<: *app-base
