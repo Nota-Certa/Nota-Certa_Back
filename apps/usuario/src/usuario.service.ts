@@ -1,15 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Usuario } from './entities/usuarios.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
+import { Empresa } from './entities/empresas.entity';
+import { CreateEmpresaDto } from './dto/create-empresa.dto';
+import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { RoleUsuarios } from './entities/role.enum';
 
 @Injectable()
 export class UsuarioService {
   constructor(
     @InjectRepository(Usuario)
     private usuarioRepository: Repository<Usuario>,
+    @InjectRepository(Empresa)
+    private empresaRepo: Repository<Empresa>,
+    @InjectDataSource() 
+    private dataSource: DataSource,
   ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
@@ -40,4 +48,48 @@ export class UsuarioService {
       throw new NotFoundException(`Usuário com id ${id} não encontrado`);
     }
   }
+
+  async createEmpresa(createEmpresaDto: CreateEmpresaDto): Promise<Empresa> {
+    const { usuario, ...dadosEmpresa } = createEmpresaDto;
+
+    return await this.dataSource.transaction(async manager => {
+
+      const empresa = manager.getRepository(Empresa).create(dadosEmpresa);
+      await manager.getRepository(Empresa).save(empresa);
+
+      const novoUsuario = manager.getRepository(Usuario).create({
+        ...usuario,
+        empresa_id: empresa.id,
+        role: RoleUsuarios.ADMIN, 
+      });
+      await manager.getRepository(Usuario).save(novoUsuario);
+
+      return empresa;
+    });
+  }
+
+  findAllEmpresa(): Promise<Empresa[]> {
+    return this.empresaRepo.find();
+  }
+
+  async findOneEmpresa(id: string): Promise<Empresa> {
+    const empresa = await this.empresaRepo.findOne({ where: { id } });
+    if (!empresa) {
+      throw new NotFoundException(`Empresa com id ${id} não encontrado`);
+    }
+    return empresa;
+  }
+
+  async updateEmpresa(id: string, updateEmpresaDto: UpdateEmpresaDto): Promise<Empresa> {
+    await this.empresaRepo.update(id, updateEmpresaDto);
+    return this.findOneEmpresa(id);
+  }
+
+  async removeEmpresa(id: string): Promise<void> {
+    const result = await this.empresaRepo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Empresa com id ${id} não encontrado`);
+    }
+  }
+
 }
