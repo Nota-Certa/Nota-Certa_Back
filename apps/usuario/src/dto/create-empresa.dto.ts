@@ -9,7 +9,6 @@ export class CreateEmpresaDto {
   @IsString()
   @IsNotEmpty()
   @Min(14)
-  @Max(14)
   cnpj: string;
 
   usuario: CreateUsuarioDto;

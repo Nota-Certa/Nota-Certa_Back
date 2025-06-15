@@ -6,5 +6,4 @@ export class CreateUsuarioDto {
   email: string;
   senha_hash: string;
   role: RoleUsuarios;
-  ativo: boolean;
 }

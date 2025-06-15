@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Usuario } from './entities/usuarios.entity';
@@ -53,6 +53,20 @@ export class UsuarioService {
     const { usuario, ...dadosEmpresa } = createEmpresaDto;
 
     return await this.dataSource.transaction(async manager => {
+
+      const empresaRepo = manager.getRepository(Empresa);
+      const usuarioRepo = manager.getRepository(Usuario);
+
+
+      const cnpjExistente = await empresaRepo.findOne({ where: { cnpj: dadosEmpresa.cnpj } });
+      if (cnpjExistente) {
+        throw new ConflictException('CNPJ já cadastrado');
+      }
+
+      const emailExistente = await usuarioRepo.findOne({ where: { email: usuario.email } });
+      if (emailExistente) {
+        throw new ConflictException('E-mail já cadastrado');
+      }
 
       const empresa = manager.getRepository(Empresa).create(dadosEmpresa);
       await manager.getRepository(Empresa).save(empresa);

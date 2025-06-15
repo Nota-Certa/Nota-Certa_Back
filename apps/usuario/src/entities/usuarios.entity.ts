@@ -38,7 +38,10 @@ export class Usuario {
     })
   role: RoleUsuarios;
 
-  @Column('boolean')
+  @Column({
+   type: 'boolean',
+   default: true
+  })
   ativo: boolean;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })

@@ -23,7 +23,7 @@ import { ConfigModule } from '@nestjs/config';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN === 'true',
       migrationsTableName: 'migrations',
-      synchronize: true,  // DESATIVAR APÓS O DESENVOLVIMENTO
+      synchronize: false,  // DESATIVAR APÓS O DESENVOLVIMENTO
     }),
     TypeOrmModule.forFeature([Empresa, Usuario]),
   ],
