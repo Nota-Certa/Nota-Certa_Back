@@ -16,14 +16,14 @@ export class NotasFiscaisService {
   ) {}
 
   async create(dto: CreateNotaFiscalDto) {
-    const nota = this.repo.create({
+    let nota = this.repo.create({
       ...dto,
       valor_total: dto.itens.reduce(
         (sum, i) => sum + i.quantidade * i.valor_unitario,
         0,
       ),
     });
-    await this.repo.save(nota);
+    nota = await this.repo.save(nota);
 
     const itens = dto.itens.map((i) =>
       this.itemRepo.create({ ...i, nota_fiscal_id: nota.id }),
