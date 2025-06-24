@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Assinatura } from './entities/assinaturas.entity';
 import { Plano } from './entities/planos.entity';
+import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
+import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
+import { CreatePlanoDto } from './dto/create-plano.dto';
+import { UpdatePlanoDto } from './dto/update-plano.dto';
 
 @Injectable()
 export class PagamentoService {
@@ -24,12 +28,12 @@ export class PagamentoService {
     return assinatura;
   }
 
-  async criarAssinatura(dto: Partial<Assinatura>) {
+  async criarAssinatura(dto: CreateAssinaturaDto) {
     const assinatura = this.assinaturaRepo.create(dto);
     return this.assinaturaRepo.save(assinatura);
   }
 
-  async atualizarAssinatura(id: string, dto: Partial<Assinatura>) {
+  async atualizarAssinatura(id: string, dto: UpdateAssinaturaDto) {
     await this.assinaturaRepo.update(id, dto);
     return this.buscarAssinaturaPorId(id);
   }
@@ -51,12 +55,12 @@ export class PagamentoService {
     return plano;
   }
 
-  async criarPlano(dto: Partial<Plano>) {
+  async criarPlano(dto: CreatePlanoDto) {
     const plano = this.planoRepo.create(dto);
     return this.planoRepo.save(plano);
   }
 
-  async atualizarPlano(id: string, dto: Partial<Plano>) {
+  async atualizarPlano(id: string, dto: UpdatePlanoDto) {
     await this.planoRepo.update(id, dto);
     return this.buscarPlanoPorId(id);
   }

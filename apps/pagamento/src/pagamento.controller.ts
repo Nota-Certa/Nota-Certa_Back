@@ -1,5 +1,9 @@
 import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
 import { PagamentoService } from './pagamento.service';
+import { CreateAssinaturaDto } from './dto/create-assinatura.dto';
+import { UpdateAssinaturaDto } from './dto/update-assinatura.dto';
+import { CreatePlanoDto } from './dto/create-plano.dto';
+import { UpdatePlanoDto } from './dto/update-plano.dto';
 
 @Controller('pagamento')
 export class PagamentoController {
@@ -17,12 +21,12 @@ export class PagamentoController {
   }
 
   @Post('assinaturas')
-  criarAssinatura(@Body() dto: any) {
+  criarAssinatura(@Body() dto: CreateAssinaturaDto) {
     return this.pagamentoService.criarAssinatura(dto);
   }
 
   @Put('assinaturas/:id')
-  atualizarAssinatura(@Param('id') id: string, @Body() dto: any) {
+  atualizarAssinatura(@Param('id') id: string, @Body() dto: UpdateAssinaturaDto) {
     return this.pagamentoService.atualizarAssinatura(id, dto);
   }
 
@@ -43,12 +47,12 @@ export class PagamentoController {
   }
 
   @Post('planos')
-  criarPlano(@Body() dto: any) {
+  criarPlano(@Body() dto: CreatePlanoDto) {
     return this.pagamentoService.criarPlano(dto);
   }
 
   @Put('planos/:id')
-  atualizarPlano(@Param('id') id: string, @Body() dto: any) {
+  atualizarPlano(@Param('id') id: string, @Body() dto: UpdatePlanoDto) {
     return this.pagamentoService.atualizarPlano(id, dto);
   }
 
