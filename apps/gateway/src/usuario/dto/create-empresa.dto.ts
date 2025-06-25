@@ -14,5 +14,6 @@ export class CreateEmpresaDto {
 
   @ValidateNested()
   @Type(() => CreateUsuarioDto)
+  @IsNotEmpty()
   usuario: CreateUsuarioDto;
 }
