@@ -29,7 +29,10 @@ export class PagamentoService {
   }
 
   async criarAssinatura(dto: CreateAssinaturaDto) {
-    const assinatura = this.assinaturaRepo.create(dto);
+    const assinatura = this.assinaturaRepo.create({
+      ...dto,
+      ativo: true, // Definindo ativo como true por padrão
+    });
     return this.assinaturaRepo.save(assinatura);
   }
 

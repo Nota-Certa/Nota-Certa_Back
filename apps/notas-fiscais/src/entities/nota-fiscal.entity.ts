@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { StatusNotaFiscal } from './status.enum';
 import { TipoPessoa } from './tipo-pessoa.enum';
@@ -48,6 +49,9 @@ export class NotaFiscal {
   @Column('text')
   xml_gerado: string;
 
-  @CreateDateColumn({ type: 'timestamptz', name: 'create_at' })
-  create_at: Date;
+  @CreateDateColumn({ type: 'timestamptz', name: 'criado_em' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'atualizado_em' })
+  updated_at: Date;
 }

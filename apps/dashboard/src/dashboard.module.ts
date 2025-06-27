@@ -17,7 +17,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.REDIS,
           options: {
-            host: configService.get<string>('REDIS_HOST', 'localhost'),
+            host: configService.get<string>('REDIS_HOST', 'redis'),
             port: configService.get<number>('REDIS_PORT', 6379),
           },
         }),

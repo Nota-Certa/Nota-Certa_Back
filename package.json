@@ -48,6 +48,7 @@
     "cache-manager-redis-store": "^3.0.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "ioredis": "^5.6.1",
     "nota-certa": "file:",
     "pg": "^8.16.2",
     "redis": "^4.7.1",
