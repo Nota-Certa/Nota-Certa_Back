@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { UsuarioController } from './usuario.controller';
+import { UsuarioController } from './usuario.gateway';
 import { UsuarioService } from './usuario.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
