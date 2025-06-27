@@ -4,9 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { StatusNotaFiscal } from './status.enum';
 import { TipoPessoa } from './tipo-pessoa.enum';
+import { NotaFiscalItem } from './nota-fiscal-itens.entity';
 
 @Entity('notas_fiscais')
 export class NotaFiscal {
@@ -46,7 +48,7 @@ export class NotaFiscal {
   @Column({ type: 'numeric', precision: 10, scale: 2 })
   valor_total: number;
 
-  @Column('text')
+  @Column('text', { nullable: true })
   xml_gerado: string;
 
   @CreateDateColumn({ type: 'timestamptz', name: 'criado_em' })
@@ -54,4 +56,7 @@ export class NotaFiscal {
 
   @UpdateDateColumn({ type: 'timestamptz', name: 'atualizado_em' })
   updated_at: Date;
+
+  @OneToMany(() => NotaFiscalItem, (item) => item.nota_fiscal)
+  itens: NotaFiscalItem[];
 }

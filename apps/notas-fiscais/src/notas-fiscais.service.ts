@@ -34,13 +34,13 @@ export class NotasFiscaisService {
   }
 
   findAll() {
-    return this.repo.find({ relations: ['cliente'] });
+    return this.repo.find({ relations: ['itens'] });
   }
 
   async findOne(id: string) {
     const nota = await this.repo.findOne({
       where: { id },
-      relations: ['cliente', 'itens'],
+      relations: ['itens'],
     });
     if (!nota) throw new NotFoundException('Nota não encontrada');
     return nota;

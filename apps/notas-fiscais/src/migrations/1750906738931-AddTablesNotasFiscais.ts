@@ -52,9 +52,20 @@ export class AddTablesNotasFiscais1750906738931 implements MigrationInterface {
             precision: 10,
             scale: 2
           },
-          { name: 'xml_gerado', type: 'text' },
-          { name: 'criado_em', type: 'timestamptz', default: 'now()' },
-          { name: 'atualizado_em', type: 'timestamptz', default: 'now()' },
+          {
+            name: 'xml_gerado',
+            type: 'text',
+          },
+          {
+            name: 'criado_em',
+            type: 'timestamptz',
+            default: 'now()'
+          },
+          {
+            name: 'atualizado_em',
+            type: 'timestamptz',
+            default: 'now()'
+          },
         ],
       }),
     );
