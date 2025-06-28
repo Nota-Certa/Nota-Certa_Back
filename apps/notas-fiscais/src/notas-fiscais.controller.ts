@@ -10,6 +10,7 @@ import {
 import { NotasFiscaisService } from './notas-fiscais.service';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
+//import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('notas-fiscais')
 export class NotasFiscaisController {
@@ -42,4 +43,21 @@ export class NotasFiscaisController {
   remove(@Param('id') id: string) {
     return this.service.remove(id);
   }
+
+  /*
+  @MessagePattern('notas.notas-por-ano')
+  async handleNotasPorAno() {
+    return this.service.getNotasPorAno();
+  }
+
+  @MessagePattern('notas.notas-por-mes')
+  async handleNotasPorMes() {
+    return this.service.getNotasPorMes();
+  }
+
+  @MessagePattern('notas.ranking-clientes')
+  async handleRankingClientes() {
+    return this.service.getRankingClientes();
+  }
+  */
 }

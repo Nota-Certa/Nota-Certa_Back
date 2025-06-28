@@ -3,21 +3,21 @@ import { DashboardService } from './dashboard.service';
 import { MessagePattern } from '@nestjs/microservices';
 
 @Controller()
-export class DashboardController {
+export class DashboardMessageController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @MessagePattern('dashboard.notas-por-ano')
-  getNotasPorAno() {
+  async handleNotasPorAno() {
     return this.dashboardService.getNotasPorAno();
   }
 
   @MessagePattern('dashboard.ranking-clientes')
-  getRankingClientes() {
+  async handleRankingClientes() {
     return this.dashboardService.getRankingClientes();
   }
 
   @MessagePattern('dashboard.notas-por-mes')
-  getNotasPorMes() {
+  async handleNotasPorMes() {
     return this.dashboardService.getNotasPorMes();
   }
 }
