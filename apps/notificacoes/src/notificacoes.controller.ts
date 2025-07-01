@@ -10,33 +10,36 @@ import {
 import { NotificacoesService } from './notificacoes.service';
 import { CreateNotificacaoDto } from './dto/create-notificacao.dto';
 import { UpdateNotificacaoDto } from './dto/update-notificacao.dto';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
-@Controller('notificacoes')
+
+@Controller()
 export class NotificacoesController {
   constructor(private readonly service: NotificacoesService) {}
 
-  @Post()
-  criar(@Body() dto: CreateNotificacaoDto) {
+  @MessagePattern('create-notificacao')
+  criar(@Payload() dto: CreateNotificacaoDto) {
     return this.service.criar(dto);
   }
 
-  @Get()
+  @MessagePattern()
   buscarTodos() {
     return this.service.buscarTodos();
   }
 
-  @Get(':id')
-  buscarUm(@Param('id') id: string) {
+  @MessagePattern('notificacao-buscar-um')
+  buscarUm(@Payload() id: string) {
     return this.service.buscarUm(id);
   }
 
-  @Patch(':id')
-  atualizar(@Param('id') id: string, @Body() dto: UpdateNotificacaoDto) {
+  @MessagePattern('update-notificacao')
+  atualizar(@Payload() payload: {id: string; dto: UpdateNotificacaoDto } ) {
+    const { id, dto } = payload;
     return this.service.atualizar(id, dto);
   }
 
-  @Delete(':id')
-  remover(@Param('id') id: string) {
+  @MessagePattern('remover-notificacao')
+  remover(@Payload() id: string) {
     return this.service.remover(id);
   }
 }
