@@ -23,6 +23,7 @@
     "build:notas-fiscais": "nest build apps/notas-fiscais",
     "build:notificacoes": "nest build apps/notificacoes",
     "build:usuario": "nest build apps/usuario",
+    "build:gateway": "nest build apps/gateway",
     "build:pagamento": "nest build apps/pagamento",
     "migrate:gen:notas": "typeorm-ts-node-commonjs migration:generate --dataSource apps/notas-fiscais/src/data-source.ts",
     "migrate:run:notas": "typeorm-ts-node-commonjs migration:run      --dataSource apps/notas-fiscais/src/data-source.ts",
