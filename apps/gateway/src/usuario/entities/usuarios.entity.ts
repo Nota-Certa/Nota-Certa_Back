@@ -5,9 +5,9 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Empresa } from './empresas.entity';
-import { IsEnum } from 'class-validator';
 import { RoleUsuarios } from './role.enum';
 
 @Entity('usuarios')
@@ -22,20 +22,20 @@ export class Usuario {
   @JoinColumn({ name: 'empresa_id' })
   empresa: Empresa;
 
-  @Column('text')
+  @Column('varchar', { length: 255 })
   nome: string;
 
-  @Column('text')
+  @Column('varchar', { length: 255 })
   email: string;
 
-  @Column('text')
-  senha_hash: string;
+  @Column('varchar', { length: 255 })
+  senha: string;
 
   @Column({
-      type: 'enum',
-      enum: RoleUsuarios,
-      default: RoleUsuarios.FUNCIONARIO,
-    })
+    type: 'enum',
+    enum: RoleUsuarios,
+    default: RoleUsuarios.FUNCIONARIO,
+  })
   role: RoleUsuarios;
 
   @Column({
@@ -44,6 +44,9 @@ export class Usuario {
   })
   ativo: boolean;
 
-  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
-  created_at: Date;
+  @CreateDateColumn({ type: 'timestamptz', name: 'criado_em' })
+  criado_em: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'atualizado_em' })
+  atualizado_em: Date;
 }
