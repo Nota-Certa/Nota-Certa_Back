@@ -1,32 +1,22 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Patch,
-  Delete,
-  Query,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, BadRequestException } from '@nestjs/common';
 import { NotasFiscaisService } from './notas-fiscais.service';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
-//import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 
 @Controller('notas-fiscais')
 export class NotasFiscaisController {
   constructor(private readonly service: NotasFiscaisService) {}
 
-  @Post()
-  create(@Body() dto: CreateNotaFiscalDto) {
+  @MessagePattern('nota-fiscal.create')
+  create(@Payload() dto: CreateNotaFiscalDto) {
     return this.service.create(dto);
   }
 
-  @Get('notas-por-periodo')
+  @MessagePattern('nota-fiscal.getNotasPorPeriodo')
   getNotasPorPeriodo(
-    @Query('mes') mes?: number,
-    @Query('ano') ano?: number,
+    @Payload('mes') mes?: number,
+    @Payload('ano') ano?: number,
   ) {
     if (mes != null) {
       if (ano == null) {
@@ -42,11 +32,11 @@ export class NotasFiscaisController {
     return this.service.getNotasPorPeriodo(mes, filtroAno);
   }
 
-  @Get('ranking-clientes')
+  @MessagePattern('nota-fiscal.getRankingClientes')
   getRankingClientes(
-    @Query('mes') mes?: number,
-    @Query('ano') ano?: number,
-    @Query('top') top?: number,
+    @Payload('mes') mes?: number,
+    @Payload('ano') ano?: number,
+    @Payload('top') top?: number,
   ) {
     if (mes != null) {
       if (ano == null) {
@@ -67,26 +57,23 @@ export class NotasFiscaisController {
     return this.service.getRankingClientesPorPeriodo(mes, filtroAno, filtroTop);
   }
 
-  @Get()
+  @MessagePattern('nota-fiscal.findAll')
   findAll() {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @MessagePattern('nota-fiscal.findOne')
+  findOne(@Payload('id') id: string) {
     return this.service.findOne(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateNotaFiscalDto,
-  ) {
+  @MessagePattern('nota-fiscal.update')
+  update(@Payload('id') id: string, @Payload('dto') dto: UpdateNotaFiscalDto) {
     return this.service.update(id, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
+  @MessagePattern('nota-fiscal.remove')
+  remove(@Payload('id') id: string) {
     return this.service.remove(id);
   }
 }
