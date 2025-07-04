@@ -1,4 +1,5 @@
-import { IsString, IsUUID, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsUUID, IsInt, IsOptional, IsEnum } from 'class-validator';
+import { StatusEnvio } from '../entities/status-envio.enum';
 
 export class CreateNotificacaoDto {
   @IsString()
@@ -10,14 +11,14 @@ export class CreateNotificacaoDto {
   @IsString()
   conteudo: string;
 
-  @IsString()
-  status_emvio: string;
+  @IsEnum(StatusEnvio)
+  status_envio: StatusEnvio;
 
   @IsString()
   evento: string;
 
   @IsUUID()
-  invoice_id: string;
+  nota_fiscal_id: string;
 
   @IsUUID()
   cliente_id: string;
@@ -27,7 +28,4 @@ export class CreateNotificacaoDto {
 
   @IsInt()
   tentativa: number;
-
-  @IsOptional()
-  create_at?: Date;
 }
