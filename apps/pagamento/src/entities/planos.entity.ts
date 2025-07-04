@@ -1,11 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('planos')
 export class Plano {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text')
+  @Column('varchar', { length: 255 })
   nome: string;
 
   @Column({ type: 'numeric', precision: 10, scale: 2 })
@@ -22,4 +22,10 @@ export class Plano {
 
   @Column('integer')
   limite_usuarios: number;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'criado_em' })
+  criado_em: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'atualizado_em' })
+  atualizado_em: Date;
 }

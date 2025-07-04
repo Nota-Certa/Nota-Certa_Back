@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import { NotaFiscal } from './entities/nota-fiscal.entity';
-import { NotaFiscalItem } from './entities/nota-fiscal-itens.entity'
+import { NotaFiscalItem } from './entities/nota-fiscal-itens.entity';
 
 export default new DataSource({
   type: 'postgres',

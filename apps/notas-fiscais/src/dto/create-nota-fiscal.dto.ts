@@ -6,7 +6,8 @@ import {
   IsDateString,
   ValidateNested,
   IsArray, ArrayMinSize,
-  IsOptional
+  IsOptional,
+  IsUUID
 } from 'class-validator';
 import { TipoPessoa } from '../entities/tipo-pessoa.enum';
 import { StatusNotaFiscal } from '../entities/status.enum';
@@ -14,6 +15,9 @@ import { Type } from 'class-transformer';
 import { CreateNotaFiscalItemDto } from './create-nota-fiscal-item.dto';
 
 export class CreateNotaFiscalDto {
+  @IsUUID()
+  empresa_id: string;
+
   @IsEnum(TipoPessoa)
   tipo_pessoa: TipoPessoa;
 

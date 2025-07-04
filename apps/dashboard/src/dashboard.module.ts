@@ -1,32 +1,30 @@
 import { Module } from '@nestjs/common';
-import { DashboardController } from './dashboard.controller';
+import { DashboardMessageController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsoMensal } from './entities/uso_mensal.entity';
-import { ConfigModule } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: +(process.env.DB_PORT ?? 5432),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME_DASHBOARD,
-      entities: [UsoMensal],
-      migrations: [__dirname + '/migrations/*{.ts,.js}'],
-      migrationsRun: process.env.TYPEORM_MIGRATIONS_RUN === 'true',
-      migrationsTableName: 'migrations',
-      synchronize: true,  // DESATIVAR APÓS O DESENVOLVIMENTO
-    }),
-    TypeOrmModule.forFeature([UsoMensal]),
+    ClientsModule.registerAsync([
+      {
+        name: 'NOTAS_SERVICE',
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.REDIS,
+          options: {
+            host: configService.get<string>('REDIS_HOST', 'redis'),
+            port: configService.get<number>('REDIS_PORT', 6379),
+          },
+        }),
+        inject: [ConfigService],
+      },
+    ]),
   ],
-  controllers: [DashboardController],
+  controllers: [DashboardMessageController],
   providers: [DashboardService],
 })
 export class DashboardModule {}

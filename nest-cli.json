@@ -56,6 +56,10 @@
       "compilerOptions": {
         "tsConfigPath": "apps/usuario/tsconfig.app.json"
       }
-    }
+    },
+    "gateway": { 
+      "type": "application", 
+      "root": "apps/gateway", 
+      "entryFile": "main" }
   }
 }

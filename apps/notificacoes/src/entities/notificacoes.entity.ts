@@ -3,30 +3,35 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { StatusEnvio } from './status-envio.enum';
 
-@Entity('Notificacoes')
+@Entity('notificacoes')
 export class Notificacoes {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text')
+  @Column('varchar', { length: 255 })
   tipo: string;
 
-  @Column('text')
+  @Column('varchar', { length: 255 })
   destinatario: string;
 
   @Column('text')
   conteudo: string;
 
-  @Column('text')
-  status_emvio: string;
+  @Column({
+    type: 'enum',
+    enum: StatusEnvio,
+  })
+  status_envio: StatusEnvio;
 
   @Column('text')
   evento: string;
 
   @Column('uuid')
-  invoice_id: string;
+  nota_fiscal_id: string;
 
   @Column('uuid')
   cliente_id: string;
@@ -37,6 +42,9 @@ export class Notificacoes {
   @Column({ type: 'integer' })
   tentativa: number;
 
-  @CreateDateColumn({ type: 'timestamptz', name: 'atualizado_em' })
-  create_at: Date;
+  @CreateDateColumn({ type: 'timestamptz', name: 'criado_em' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'atualizado_em' })
+  updated_at: Date;
 }

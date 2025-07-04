@@ -17,7 +17,7 @@ export class NotaFiscalItem {
 
   @ManyToOne(() => NotaFiscal)
   @JoinColumn({ name: 'nota_fiscal_id' })
-  nota_fiscal: NotaFiscal;
+  nota_fiscal?: NotaFiscal;
 
   @Column('text')
   descricao: string;

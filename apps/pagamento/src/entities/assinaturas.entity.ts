@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Plano } from './planos.entity';
 
@@ -34,4 +35,7 @@ export class Assinatura {
 
   @CreateDateColumn({ type: 'timestamptz', name: 'criado_em' })
   criado_em: Date;
+
+  @UpdateDateColumn ({ type: 'timestamptz', name: 'atualizado_em' })
+  atualizado_em: Date;
 }
