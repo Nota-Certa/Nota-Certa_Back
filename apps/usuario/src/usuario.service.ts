@@ -69,16 +69,18 @@ export class UsuarioService {
       }
 
       const empresa = manager.getRepository(Empresa).create(dadosEmpresa);
-      await manager.getRepository(Empresa).save(empresa);
+      
+      const empresaSalva = await manager.getRepository(Empresa).save(empresa);
 
       const novoUsuario = manager.getRepository(Usuario).create({
         ...usuario,
-        empresa_id: empresa.id,
-        role: RoleUsuarios.ADMIN, 
+
+        empresa_id: empresaSalva.id, 
+        role: RoleUsuarios.ADMIN,
       });
       await manager.getRepository(Usuario).save(novoUsuario);
 
-      return empresa;
+      return empresaSalva;
     });
   }
 
