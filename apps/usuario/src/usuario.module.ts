@@ -24,7 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         migrations: [__dirname + '/migrations/*{.ts,.js}'],
         migrationsRun: config.get('TYPEORM_MIGRATIONS_RUN') === 'true',
         migrationsTableName: 'migrations',
-        synchronize: true,  // DESATIVAR APÓS O DESENVOLVIMENTO
+        synchronize: false,
       }),
       inject: [ConfigService],
     }),

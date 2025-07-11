@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('empresas')
@@ -10,12 +11,15 @@ export class Empresa {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text')
+  @Column('varchar', { length: 255 })
   nome_razao_social: string;
 
-  @Column({ type: 'character varying', length: 14 })
+  @Column({ type: 'varchar', length: 14 })
   cnpj: string;
 
-  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
-  created_at: Date;
+  @CreateDateColumn({ type: 'timestamptz', name: 'criado_em' })
+  criado_em: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'atualizado_em' })
+  atualizado_em: Date;
 }

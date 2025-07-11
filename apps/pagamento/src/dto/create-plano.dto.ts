@@ -1,16 +1,21 @@
-import { IsString, IsInt, IsOptional } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsNumber, isBoolean, IsBoolean } from 'class-validator';
 
 export class CreatePlanoDto {
   @IsString()
   nome: string;
 
-  @IsString()
-  descricao: string;
+  @IsNumber()
+  valor_mensal: number;
 
   @IsInt()
-  preco: number;
+  limite_notas_mensal: number;
+
+  @IsNumber()
+  valor_excedente: number;
+
+  @IsBoolean()
+  acesso_premium: boolean;
 
   @IsInt()
-  @IsOptional()
-  duracaoDias?: number;
+  limite_usuarios: number;
 }
