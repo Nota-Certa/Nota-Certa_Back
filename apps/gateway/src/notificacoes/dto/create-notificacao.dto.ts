@@ -1,5 +1,5 @@
-import { IsString, IsUUID, IsInt, IsOptional, IsEnum } from 'class-validator';
-import { StatusEnvio } from '../entities/status-envio.enum';
+import { IsString, IsUUID, IsInt, IsEnum } from 'class-validator';
+import { StatusEnvio } from '../enums/status-envio.enum';
 
 export class CreateNotificacaoDto {
   @IsString()

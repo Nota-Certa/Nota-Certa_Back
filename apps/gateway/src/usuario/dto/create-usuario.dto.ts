@@ -1,19 +1,19 @@
-import { RoleUsuarios } from "../entities/role.enum";
-import { IsEmail, IsNotEmpty, IsString, IsBoolean } from 'class-validator';
+import { IsEnum, IsString, IsUUID } from "class-validator";
+import { RoleUsuarios } from "../enums/role.enum";
 
 export class CreateUsuarioDto {
+  @IsUUID()
+  empresa_id: string;
+
   @IsString()
-  @IsNotEmpty()
   nome: string;
 
-  @IsEmail()
-  @IsNotEmpty()
+  @IsString()
   email: string;
 
   @IsString()
-  @IsNotEmpty()
-  senha_hash: string;
+  senha: string;
 
-  @IsBoolean()
-  ativo: boolean;
+  @IsEnum(RoleUsuarios)
+  role: RoleUsuarios;
 }

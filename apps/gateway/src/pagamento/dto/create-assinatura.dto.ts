@@ -1,25 +1,19 @@
-import { IsString, IsUUID, IsOptional, IsDate, IsInt } from 'class-validator';
+import { IsUUID, IsOptional, IsDate, IsBoolean } from 'class-validator';
 
 export class CreateAssinaturaDto {
   @IsUUID()
   planoId: string;
 
   @IsUUID()
-  usuarioId: string;
+  empresa_id: string;
 
   @IsDate()
-  @IsOptional()
-  dataInicio?: Date;
+  inicio: Date;
 
   @IsDate()
-  @IsOptional()
-  dataFim?: Date;
+  fim: Date;
 
-  @IsString()
+  @IsBoolean()
   @IsOptional()
-  status?: string;
-
-  @IsInt()
-  @IsOptional()
-  tentativasPagamento?: number;
+  ativo?: boolean;
 }
