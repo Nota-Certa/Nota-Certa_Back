@@ -10,7 +10,7 @@ import { NotasFiscaisService } from './notas-fiscais.service';
 import { NotaFiscal } from './entities/nota-fiscal.entity';
 import { NotaFiscalItem } from './entities/nota-fiscal-itens.entity';
 import { TipoPessoa } from './entities/tipo-pessoa.enum';
-import { StatusNotaFiscal } from './entities/status.enum';
+import { StatusNotaFiscal } from './enums/status.enum';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
 
