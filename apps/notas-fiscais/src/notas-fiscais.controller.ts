@@ -1,8 +1,9 @@
-import { Controller, BadRequestException } from '@nestjs/common';
+import { Controller, BadRequestException, StreamableFile } from '@nestjs/common';
 import { NotasFiscaisService } from './notas-fiscais.service';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { ExportNotaFiscalFormat } from './enums/export-nota-fiscal-format.enum';
 
 @Controller('notas-fiscais')
 export class NotasFiscaisController {
@@ -75,5 +76,42 @@ export class NotasFiscaisController {
   @MessagePattern('nota-fiscal.remove')
   remove(@Payload('id') id: string) {
     return this.service.remove(id);
+  }
+
+  @MessagePattern('nota-fiscal.downloadXml')
+  async downloadXml(@Payload('id') id: string): Promise<string> {
+    return this.service.getXmlGerado(id);
+  }
+
+  @MessagePattern('nota-fiscal.gerarXml')
+  async gerarXml(@Payload('id') id: string): Promise<string> {
+    return this.service.gerarXmlESalvar(id);
+  }
+
+  @MessagePattern('nota-fiscal.exportNotaFiscal')
+  async exportNotaFiscal(
+    @Payload('id') id: string,
+    @Payload('format') format: string,
+  ) {
+    const fmt = ExportNotaFiscalFormat[format.toUpperCase()];
+    if (!fmt) throw new BadRequestException('Formato não suportado');
+
+    switch (fmt) {
+      case ExportNotaFiscalFormat.CSV: {
+        const csv = await this.service.exportNotaFiscal(id, fmt);
+        return Buffer.from(csv);
+      }
+      case ExportNotaFiscalFormat.XML: {
+        const xml = await this.service.exportNotaFiscal(id, fmt);
+        return Buffer.from(xml);
+      }
+      case ExportNotaFiscalFormat.PDF: {
+        return await this.service.exportNotaFiscal(id, fmt) as Buffer;
+      }
+      case ExportNotaFiscalFormat.JSON: {
+        const json = await this.service.exportNotaFiscal(id, fmt);
+        return Buffer.from(json);
+      }
+    }
   }
 }
