@@ -2,14 +2,12 @@ import { Module } from '@nestjs/common';
 import { PaymentController } from './pagamento.gateway';
 import { PaymentService } from './pagamento.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { PagamentoController } from 'apps/pagamento/src/pagamento.controller';
-import { PagamentoService } from 'apps/pagamento/src/pagamento.service';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: 'DASHBOARD_SERVICE',
+        name: 'PAGAMENTO_SERVICE',
         transport: Transport.REDIS,
         options: {
           host: process.env.REDIS_HOST || 'redis',
@@ -18,8 +16,8 @@ import { PagamentoService } from 'apps/pagamento/src/pagamento.service';
       },
     ]),
   ],
-  controllers: [PagamentoController],
-  providers: [PagamentoService],
-  exports: [PagamentoService],
+  controllers: [PaymentController],
+  providers: [PaymentService],
+  exports: [PaymentService],
 })
-export class DashboardModule {}
+export class PagamentoModule {}

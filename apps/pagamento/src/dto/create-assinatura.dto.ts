@@ -1,4 +1,4 @@
-import { IsUUID, IsOptional, IsDate, IsBoolean } from 'class-validator';
+import { IsUUID, IsOptional, IsBoolean, IsDateString } from 'class-validator';
 
 export class CreateAssinaturaDto {
   @IsUUID()
@@ -7,11 +7,11 @@ export class CreateAssinaturaDto {
   @IsUUID()
   empresa_id: string;
 
-  @IsDate()
-  inicio: Date;
+  @IsDateString()
+  inicio: string;
 
-  @IsDate()
-  fim: Date;
+  @IsDateString()
+  fim: string;
 
   @IsBoolean()
   @IsOptional()

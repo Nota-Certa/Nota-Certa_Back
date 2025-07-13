@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UsuarioModule } from './usuario/usuario.module';
+import { PagamentoModule } from './pagamento/pagamento.module';
 
 @Module({
   imports: [
@@ -24,9 +25,18 @@ import { UsuarioModule } from './usuario/usuario.module';
           port: parseInt(process.env.REDIS_PORT || '6379'),
         },
       },
+      {
+        name: 'PAGAMENTO_SERVICE',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST || 'redis',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+        },
+      },
     ]),
     DashboardModule,
     UsuarioModule,
+    PagamentoModule,
   ],
 })
 export class AppModule {}

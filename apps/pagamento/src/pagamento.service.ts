@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Assinatura } from './entities/assinaturas.entity';
@@ -29,11 +29,20 @@ export class PagamentoService {
   }
 
   async criarAssinatura(dto: CreateAssinaturaDto) {
+    console.log('Creating subscription with DTO:', dto); // log de debug
+    
     const assinatura = this.assinaturaRepo.create({
-      ...dto,
-      ativo: true, // Definindo ativo como true por padrão
+      plano_id: dto.planoId, // Map planoId to plano_id
+      empresa_id: dto.empresa_id,
+      inicio: new Date(dto.inicio),
+      fim: new Date(dto.fim),
+      ativo: dto.ativo !== undefined ? dto.ativo : true,
     });
-    return this.assinaturaRepo.save(assinatura);
+    
+    console.log('Created entity:', assinatura);
+    const result = await this.assinaturaRepo.save(assinatura);
+    console.log('Saved subscription:', result);
+    return result;
   }
 
   async atualizarAssinatura(id: string, dto: UpdateAssinaturaDto) {

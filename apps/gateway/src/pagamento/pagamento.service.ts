@@ -23,7 +23,11 @@ export class PaymentService {
   }
 
   criarAssinatura(dto: CreateAssinaturaDto) {
-    return firstValueFrom(this.client.send('criar_assinatura', dto));
+    console.log('Gateway: Sending criar_assinatura message with:', dto); // logs de debug
+    return firstValueFrom(this.client.send('criar_assinatura', dto)).catch(error => {
+      console.error('Gateway: Error from microservice:', error);
+      throw error;
+    });
   }
 
   atualizarAssinatura(id: string, dto: UpdateAssinaturaDto) {
