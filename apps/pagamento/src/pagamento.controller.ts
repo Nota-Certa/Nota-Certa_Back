@@ -67,8 +67,4 @@ export class PagamentoController {
   deletarPlano(id: string) {
     return this.pagamentoService.deletarPlano(id);
   }
-
-  getHello(): string {
-    return 'Hello World!';
-  }
 }

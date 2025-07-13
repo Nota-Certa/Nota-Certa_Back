@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Assinatura } from './entities/assinaturas.entity';
@@ -31,28 +31,18 @@ export class PagamentoService {
   async criarAssinatura(dto: CreateAssinaturaDto) {
     console.log('Creating subscription with DTO:', dto); // log de debug
     
-    // Setar datas se nao forem fornecidas
-    const now = new Date();
-    const defaultEndDate = new Date();
-    defaultEndDate.setDate(defaultEndDate.getDate() + 30); // 30 dias a partir de hoje
+    const assinatura = this.assinaturaRepo.create({
+      plano_id: dto.planoId, // Map planoId to plano_id
+      empresa_id: dto.empresa_id,
+      inicio: new Date(dto.inicio),
+      fim: new Date(dto.fim),
+      ativo: dto.ativo !== undefined ? dto.ativo : true,
+    });
     
-    try {
-      const assinatura = this.assinaturaRepo.create({
-        plano_id: dto.planoId, // Map planoId to plano_id
-        empresa_id: dto.empresa_id,
-        inicio: dto.inicio ? new Date(dto.inicio) : now,
-        fim: dto.fim ? new Date(dto.fim) : defaultEndDate,
-        ativo: dto.ativo !== undefined ? dto.ativo : true,
-      });
-      
-      console.log('Created entity:', assinatura);
-      const result = await this.assinaturaRepo.save(assinatura);
-      console.log('Saved subscription:', result);
-      return result;
-    } catch (error) {
-      console.error('Database error:', error);
-      throw error;
-    }
+    console.log('Created entity:', assinatura);
+    const result = await this.assinaturaRepo.save(assinatura);
+    console.log('Saved subscription:', result);
+    return result;
   }
 
   async atualizarAssinatura(id: string, dto: UpdateAssinaturaDto) {

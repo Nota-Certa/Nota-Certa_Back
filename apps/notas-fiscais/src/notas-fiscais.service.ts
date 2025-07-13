@@ -6,6 +6,10 @@ import { NotaFiscalItem } from './entities/nota-fiscal-itens.entity';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
 import { RankingCliente } from './interfaces/ranking-cliente';
+import { ExportNotaFiscalFormat } from './enums/export-nota-fiscal-format.enum';
+import { XMLBuilder } from 'fast-xml-parser';
+import PDFDocument from 'pdfkit';
+import { parse as json2csv } from 'json2csv';
 
 @Injectable()
 export class NotasFiscaisService {
@@ -110,5 +114,126 @@ export class NotasFiscaisService {
     const res = await this.repo.delete(id);
     if (!res.affected) throw new NotFoundException('Nota não encontrada');
     return { deleted: true };
+  }
+
+  async getXmlGerado(id: string): Promise<string> {
+    const nota = await this.findOne(id);
+    if (!nota.xml_gerado) {
+      return this.gerarXmlESalvar(id);
+    }
+    return nota.xml_gerado;
+  }
+
+  async gerarXmlESalvar(id: string) {
+    const xml = this.exportAsXML(await this.findOne(id));
+    await this.repo.update(id, { xml_gerado: xml });
+    return xml;
+  }
+
+  async exportNotaFiscal(id: string, format: ExportNotaFiscalFormat) {
+    const nota = await this.findOne(id);
+    switch (format) {
+      case ExportNotaFiscalFormat.PDF:
+        return this.exportAsPDF(nota);
+      case ExportNotaFiscalFormat.XML:
+        return this.exportAsXML(nota);
+      case ExportNotaFiscalFormat.CSV:
+        return this.exportAsCSV(nota);
+      case ExportNotaFiscalFormat.JSON:
+        return this.exportAsJSON(nota);
+    }
+  }
+
+  exportAsJSON(nota: NotaFiscal) {
+    return JSON.stringify(nota, null, 2);
+  }
+
+  exportAsXML(nota: NotaFiscal) {
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      format: true,
+      // rootName definirá o nome da tag raiz; pode ser "notaFiscal"
+      tagValueProcessor: (a) => (typeof a === 'string' ? a : String(a)),
+    });
+
+    // Monta o XML da nota fiscal
+    const wrapped = { nota_fiscal: nota };
+    const xml = builder.build(wrapped);
+    return xml;
+  }
+
+  exportAsPDF(nota: NotaFiscal) {
+    const doc = new PDFDocument({ margin: 30 });
+    const chunks: Buffer[] = [];
+    doc.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+    doc.on('end', () => { /* nada aqui */ });
+
+    // Cabeçalho
+    doc.fontSize(20).text('Nota Fiscal', { align: 'center' });
+    doc.moveDown();
+
+    // Dados principais
+    doc.fontSize(12);
+    doc.text(`ID: ${nota.id}`);
+    doc.text(`Empresa: ${nota.empresa_id}`);
+    doc.text(`Documento: ${nota.documento}`);
+    doc.text(`Nome/Razão Social: ${nota.nome_razao_social}`);
+    doc.text(`Tipo Pessoa: ${nota.tipo_pessoa}`);
+    doc.text(`Status: ${nota.status}`);
+    doc.text(`Emissão: ${nota.data_emissao.toISOString()}`);
+    doc.text(`Vencimento: ${nota.data_vencimento.toISOString()}`);
+    doc.text(`Valor Total: R$ ${nota.valor_total.toFixed(2)}`);
+    doc.moveDown();
+
+    // Tabela de itens
+    doc.fontSize(14).text('Itens', { underline: true });
+    doc.moveDown(0.5);
+    nota.itens.forEach((i, idx) => {
+      doc.fontSize(12).text(
+        `${idx + 1}. ${i.descricao} — ${i.quantidade} x R$ ${i.valor_unitario.toFixed(2)} = R$ ${(
+          i.quantidade * i.valor_unitario
+        ).toFixed(2)}`
+      );
+      doc.text(`   Impostos: ${JSON.stringify(i.impostos)}`);
+      doc.moveDown(0.5);
+    });
+
+    doc.end();
+    return Buffer.concat(chunks);
+  }
+
+  exportAsCSV(nota: NotaFiscal) {
+    // Dados principais da nota
+    const notaFlat = {
+      id: nota.id,
+      empresa_id: nota.empresa_id,
+      documento: nota.documento,
+      nome_razao_social: nota.nome_razao_social,
+      tipo_pessoa: nota.tipo_pessoa,
+      status: nota.status,
+      data_emissao: nota.data_emissao.toISOString(),
+      data_vencimento: nota.data_vencimento.toISOString(),
+      valor_total: nota.valor_total,
+    };
+    const csvNota = json2csv([notaFlat]);
+
+    // Itens da nota
+    const itensFlat = nota.itens.map((i) => ({
+      id: i.id,
+      descricao: i.descricao,
+      quantidade: i.quantidade,
+      valor_unitario: i.valor_unitario,
+      impostos: JSON.stringify(i.impostos),
+    }));
+    const csvItens = json2csv(itensFlat);
+
+    // Juntando as duas partes com um separador
+    return [
+      '# Nota Fiscal',
+      csvNota,
+      '',
+      '# Itens',
+      csvItens,
+    ].join('\n');
   }
 }
