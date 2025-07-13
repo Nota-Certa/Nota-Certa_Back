@@ -23,7 +23,13 @@ export class PagamentoController {
 
   @MessagePattern('criar_assinatura')
   criarAssinatura(dto: CreateAssinaturaDto) {
-    return this.pagamentoService.criarAssinatura(dto);
+    console.log('Received criar_assinatura message:', dto); // logs de debug
+    try {
+      return this.pagamentoService.criarAssinatura(dto);
+    } catch (error) {
+      console.error('Error in criarAssinatura:', error);
+      throw error;
+    }
   }
 
   @MessagePattern('atualizar_assinatura')
@@ -60,5 +66,9 @@ export class PagamentoController {
   @MessagePattern('deletar_plano')
   deletarPlano(id: string) {
     return this.pagamentoService.deletarPlano(id);
+  }
+
+  getHello(): string {
+    return 'Hello World!';
   }
 }

@@ -29,11 +29,30 @@ export class PagamentoService {
   }
 
   async criarAssinatura(dto: CreateAssinaturaDto) {
-    const assinatura = this.assinaturaRepo.create({
-      ...dto,
-      ativo: true, // Definindo ativo como true por padrão
-    });
-    return this.assinaturaRepo.save(assinatura);
+    console.log('Creating subscription with DTO:', dto); // log de debug
+    
+    // Setar datas se nao forem fornecidas
+    const now = new Date();
+    const defaultEndDate = new Date();
+    defaultEndDate.setDate(defaultEndDate.getDate() + 30); // 30 dias a partir de hoje
+    
+    try {
+      const assinatura = this.assinaturaRepo.create({
+        plano_id: dto.planoId, // Map planoId to plano_id
+        empresa_id: dto.empresa_id,
+        inicio: dto.inicio ? new Date(dto.inicio) : now,
+        fim: dto.fim ? new Date(dto.fim) : defaultEndDate,
+        ativo: dto.ativo !== undefined ? dto.ativo : true,
+      });
+      
+      console.log('Created entity:', assinatura);
+      const result = await this.assinaturaRepo.save(assinatura);
+      console.log('Saved subscription:', result);
+      return result;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
   }
 
   async atualizarAssinatura(id: string, dto: UpdateAssinaturaDto) {
