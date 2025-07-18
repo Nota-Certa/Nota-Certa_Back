@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { NotaFiscal } from './entities/nota-fiscal.entity';
@@ -53,10 +57,12 @@ export class NotasFiscaisService {
 
   async getNotasPorPeriodo(mes: number | undefined, ano: number) {
     let inicio = new Date(`${ano}-01-01T00:00:00Z`);
-    let fim    = new Date(`${ano}-12-31T23:59:59Z`);
+    let fim = new Date(`${ano}-12-31T23:59:59Z`);
 
     if (mes != null) {
-      inicio = new Date(`${ano}-${mes.toString().padStart(2, '0')}-01T00:00:00Z`);
+      inicio = new Date(
+        `${ano}-${mes.toString().padStart(2, '0')}-01T00:00:00Z`,
+      );
       fim = new Date(inicio);
       fim.setMonth(fim.getMonth() + 1);
     }
@@ -66,7 +72,10 @@ export class NotasFiscaisService {
       relations: ['itens'],
     });
 
-    if (!notas.length) throw new NotFoundException('Nenhuma nota encontrada para o período especificado');
+    if (!notas.length)
+      throw new NotFoundException(
+        'Nenhuma nota encontrada para o período especificado',
+      );
     return notas;
   }
 
@@ -81,7 +90,7 @@ export class NotasFiscaisService {
       fim = new Date(Date.UTC(ano, mes, 0, 23, 59, 59));
     } else {
       inicio = new Date(Date.UTC(ano, 0, 1, 0, 0, 0));
-      fim    = new Date(Date.UTC(ano, 11, 31, 23, 59, 59));
+      fim = new Date(Date.UTC(ano, 11, 31, 23, 59, 59));
     }
 
     const rows = await this.repo
@@ -96,9 +105,12 @@ export class NotasFiscaisService {
       .limit(top)
       .getRawMany<RankingCliente>();
 
-    if (!rows.length) throw new NotFoundException('Nenhum cliente encontrado para o período especificado');
+    if (!rows.length)
+      throw new NotFoundException(
+        'Nenhum cliente encontrado para o período especificado',
+      );
 
-    return rows.map(r => ({
+    return rows.map((r) => ({
       documento: r.documento,
       nome_razao_social: r.nome_razao_social,
       qtd: Number(r.qtd),
@@ -106,6 +118,7 @@ export class NotasFiscaisService {
   }
 
   async update(id: string, dto: UpdateNotaFiscalDto) {
+    await this.findOne(id);
     await this.repo.update(id, dto);
     return this.findOne(id);
   }
@@ -141,6 +154,10 @@ export class NotasFiscaisService {
         return this.exportAsCSV(nota);
       case ExportNotaFiscalFormat.JSON:
         return this.exportAsJSON(nota);
+      default:
+        throw new BadRequestException(
+          `Formato de exportação inválido: ${format}`,
+        );
     }
   }
 
@@ -166,7 +183,9 @@ export class NotasFiscaisService {
     const doc = new PDFDocument({ margin: 30 });
     const chunks: Buffer[] = [];
     doc.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-    doc.on('end', () => { /* nada aqui */ });
+    doc.on('end', () => {
+      /* nada aqui */
+    });
 
     // Cabeçalho
     doc.fontSize(20).text('Nota Fiscal', { align: 'center' });
@@ -189,11 +208,13 @@ export class NotasFiscaisService {
     doc.fontSize(14).text('Itens', { underline: true });
     doc.moveDown(0.5);
     nota.itens.forEach((i, idx) => {
-      doc.fontSize(12).text(
-        `${idx + 1}. ${i.descricao} — ${i.quantidade} x R$ ${i.valor_unitario.toFixed(2)} = R$ ${(
-          i.quantidade * i.valor_unitario
-        ).toFixed(2)}`
-      );
+      doc
+        .fontSize(12)
+        .text(
+          `${idx + 1}. ${i.descricao} — ${i.quantidade} x R$ ${i.valor_unitario.toFixed(2)} = R$ ${(
+            i.quantidade * i.valor_unitario
+          ).toFixed(2)}`,
+        );
       doc.text(`   Impostos: ${JSON.stringify(i.impostos)}`);
       doc.moveDown(0.5);
     });
@@ -228,12 +249,6 @@ export class NotasFiscaisService {
     const csvItens = json2csv(itensFlat);
 
     // Juntando as duas partes com um separador
-    return [
-      '# Nota Fiscal',
-      csvNota,
-      '',
-      '# Itens',
-      csvItens,
-    ].join('\n');
+    return ['# Nota Fiscal', csvNota, '', '# Itens', csvItens].join('\n');
   }
 }
