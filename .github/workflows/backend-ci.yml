@@ -44,6 +44,12 @@ jobs:
       - name: Instalar dependecias
         run: npm install
 
+      - name: Setando Docker Buildx
+        # Configura o Docker Buildx, que é uma ferramenta para construir imagens Docker de forma eficiente e paralela.
+        # Buildx é necessário para construir imagens multi-plataforma e usar recursos avançados de cache.
+        # Sem ela, o build falhou
+        uses: docker/setup-buildx-action@v3
+
       #- name: Log in to GitHub Container Registry (GHCR)
         # Loga no GHCR utilizando o token provido pelo GitHub Actions
         # Prerequisito para dar push em imagens do github.
