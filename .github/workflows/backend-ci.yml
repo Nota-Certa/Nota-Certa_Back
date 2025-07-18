@@ -72,7 +72,7 @@ jobs:
           # ghcr.io/${{ github.repository_owner }} is the standard prefix for GHCR.
           # backend-${{ matrix.app_name }} creates a unique name for each microservice.
           # ${{ github.sha }} uses the full commit SHA as the tag, ensuring unique images per commit.
-          tags: ghcr.io/${{ github.repository_owner }}/backend-${{ matrix.app_name }}:${{ github.sha }}
+          tags: ghcr.io/${{ github.repository_owner | toLower }}/backend-${{ matrix.app_name }}:${{ github.sha }}
           # Pass the APP_NAME as a build argument to your Dockerfile
           build-args: |
             APP_NAME=${{ matrix.app_name }}
