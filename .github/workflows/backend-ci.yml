@@ -44,6 +44,11 @@ jobs:
       - name: Instalar dependecias
         run: npm install
 
+      - name: Colocar repository owner em minusculo
+        id: set_lowercase_owner
+        # Use a shell command to convert the repository owner to lowercase
+        run: echo "LOWERCASE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Setando Docker Buildx
         # Configura o Docker Buildx, que é uma ferramenta para construir imagens Docker de forma eficiente e paralela.
         # Buildx é necessário para construir imagens multi-plataforma e usar recursos avançados de cache.
@@ -72,7 +77,7 @@ jobs:
           # ghcr.io/${{ github.repository_owner }} is the standard prefix for GHCR.
           # backend-${{ matrix.app_name }} creates a unique name for each microservice.
           # ${{ github.sha }} uses the full commit SHA as the tag, ensuring unique images per commit.
-          tags: ghcr.io/${{ github.repository_owner | toLower }}/backend-${{ matrix.app_name }}:${{ github.sha }}
+          tags: ghcr.io/${{ env.LOWERCASE_OWNER }}/backend-${{ matrix.app_name }}:${{ github.sha }}
           # Pass the APP_NAME as a build argument to your Dockerfile
           build-args: |
             APP_NAME=${{ matrix.app_name }}
