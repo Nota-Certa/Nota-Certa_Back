@@ -33,8 +33,8 @@ export class PagamentoService {
   }
 
   async criarAssinatura(dto: CreateAssinaturaDto) {
-    console.log('Creating subscription with DTO:', dto); // log de debug
-    const plano = await this.planoRepo.findOne({ where: { id: dto.planoId } });
+    console.log('Creating subscription with DTO:', dto);
+    const plano = await this.planoRepo.findOne({ where: { id: dto.plano_id } });
     if (!plano) {
       throw new BadRequestException('Plano informado não existe');
     }
@@ -46,7 +46,7 @@ export class PagamentoService {
     }
 
     const assinatura = this.assinaturaRepo.create({
-      plano_id: dto.planoId, // Map planoId to plano_id
+      plano_id: dto.plano_id,
       empresa_id: dto.empresa_id,
       inicio: new Date(dto.inicio),
       fim: new Date(dto.fim),
