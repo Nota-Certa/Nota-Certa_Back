@@ -9,9 +9,10 @@ import {
   IsOptional,
   IsUUID
 } from 'class-validator';
-import { TipoPessoa } from '../entities/tipo-pessoa.enum';
-import { StatusNotaFiscal } from '../enums/status.enum';
+
 import { Type } from 'class-transformer';
+import { TipoPessoa } from '../enums/tipo-pessoa.enum';
+import { StatusNotaFiscal } from '../enums/status.enum';
 import { CreateNotaFiscalItemDto } from './create-nota-fiscal-item.dto';
 
 export class CreateNotaFiscalDto {

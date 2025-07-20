@@ -16,7 +16,7 @@ export class UsuarioService {
     private usuarioRepository: Repository<Usuario>,
     @InjectRepository(Empresa)
     private empresaRepo: Repository<Empresa>,
-    @InjectDataSource() 
+    @InjectDataSource()
     private dataSource: DataSource,
   ) {}
 
@@ -38,8 +38,17 @@ export class UsuarioService {
   }
 
   async update(id: string, updateUsuarioDto: UpdateUsuarioDto): Promise<Usuario> {
-    await this.usuarioRepository.update(id, updateUsuarioDto);
-    return this.findOne(id);
+    const result = await this.usuarioRepository.update(id, updateUsuarioDto);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Usuário com id ${id} não encontrado`);
+    }
+
+    const usuarioAtualizado = await this.usuarioRepository.findOneBy({ id });
+    if (!usuarioAtualizado) {
+      throw new NotFoundException(`Usuário com id ${id} não encontrado`);
+    }
+    return usuarioAtualizado;
   }
 
   async remove(id: string): Promise<void> {
@@ -69,13 +78,13 @@ export class UsuarioService {
       }
 
       const empresa = manager.getRepository(Empresa).create(dadosEmpresa);
-      
+
       const empresaSalva = await manager.getRepository(Empresa).save(empresa);
 
       const novoUsuario = manager.getRepository(Usuario).create({
         ...usuario,
 
-        empresa_id: empresaSalva.id, 
+        empresa_id: empresaSalva.id,
         role: RoleUsuarios.ADMIN,
       });
       await manager.getRepository(Usuario).save(novoUsuario);
@@ -97,8 +106,17 @@ export class UsuarioService {
   }
 
   async updateEmpresa(id: string, updateEmpresaDto: UpdateEmpresaDto): Promise<Empresa> {
-    await this.empresaRepo.update(id, updateEmpresaDto);
-    return this.findOneEmpresa(id);
+    const result = await this.empresaRepo.update(id, updateEmpresaDto);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Empresa com id ${id} não encontrado`);
+    }
+
+    const empresaAtualizada = await this.empresaRepo.findOneBy({ id });
+    if (!empresaAtualizada) {
+      throw new NotFoundException(`Empresa com id ${id} não encontrada`);
+    }
+    return empresaAtualizada;
   }
 
   async removeEmpresa(id: string): Promise<void> {
