@@ -6,13 +6,14 @@ import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseUsuarioDto } from './dto/response-usuario.dto';
+import { ResponseEmpresaDto } from './dto/response-empresa.dto';
 
+@ApiTags('Usuários')
 @Controller('usuarios')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
   @Post()
-  @ApiTags('Usuários')
   @ApiOperation({ summary: 'Cria um novo usuário' })
   @ApiResponse({ status: 201, description: 'Usuário criado com sucesso.', type: ResponseUsuarioDto })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
@@ -25,7 +26,7 @@ export class UsuarioController {
   @Post('empresa')
   @ApiTags('Empresas')
   @ApiOperation({ summary: 'Cria uma nova empresa' })
-  @ApiResponse({ status: 201, description: 'Empresa criada com sucesso.' })
+  @ApiResponse({ status: 201, description: 'Empresa criada com sucesso.', type: ResponseEmpresaDto })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 409, description: 'Empresa já existe.' })
   @ApiBody({ type: CreateEmpresaDto })
@@ -55,7 +56,7 @@ export class UsuarioController {
   @Patch('empresa/:id')
   @ApiTags('Empresas')
   @ApiOperation({ summary: 'Atualiza uma empresa pelo ID' })
-  @ApiResponse({ status: 200, description: 'Empresa atualizada com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Empresa atualizada com sucesso.', type: ResponseEmpresaDto })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 404, description: 'Empresa não encontrada.' })
   @ApiBody({ type: UpdateEmpresaDto })
@@ -73,7 +74,6 @@ export class UsuarioController {
   }
 
   @Get()
-  @ApiTags('Usuários')
   @ApiOperation({ summary: 'Lista todos os usuários' })
   @ApiResponse({ status: 200, description: 'Lista de usuários retornada com sucesso.' })
   @ApiResponse({ status: 404, description: 'Nenhum usuário encontrado.' })
@@ -82,7 +82,6 @@ export class UsuarioController {
   }
 
   @Get(':id')
-  @ApiTags('Usuários')
   @ApiOperation({ summary: 'Busca um usuário pelo ID' })
   @ApiResponse({ status: 200, description: 'Usuário encontrado com sucesso.' })
   @ApiResponse({ status: 400, description: 'ID inválido.' })
@@ -92,9 +91,8 @@ export class UsuarioController {
   }
 
   @Patch(':id')
-  @ApiTags('Usuários')
   @ApiOperation({ summary: 'Atualiza um usuário pelo ID' })
-  @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.' })
+  @ApiResponse({ status: 200, description: 'Usuário atualizado com sucesso.', type: ResponseUsuarioDto })
   @ApiResponse({ status: 400, description: 'Dados inválidos.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })
   @ApiBody({ type: UpdateUsuarioDto })
@@ -103,7 +101,6 @@ export class UsuarioController {
   }
 
   @Delete(':id')
-  @ApiTags('Usuários')
   @ApiOperation({ summary: 'Remove um usuário pelo ID' })
   @ApiResponse({ status: 200, description: 'Usuário removido com sucesso.' })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado.' })

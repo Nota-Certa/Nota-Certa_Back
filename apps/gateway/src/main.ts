@@ -23,8 +23,6 @@ async function bootstrap() {
     .setTitle('API Gateway - Usuários')
     .setDescription('Documentação da API para o microserviço de usuários e empresas.')
     .setVersion('1.0')
-    .addTag('Usuários')
-    .addTag('Empresas')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
