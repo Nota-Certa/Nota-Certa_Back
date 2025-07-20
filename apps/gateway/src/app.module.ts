@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UsuarioModule } from './usuario/usuario.module';
+import { NotasFiscaisModule } from 'apps/notas-fiscais/src/notas-fiscais.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UsuarioModule } from './usuario/usuario.module';
     ]),
     DashboardModule,
     UsuarioModule,
+    NotasFiscaisModule,
   ],
 })
 export class AppModule {}
