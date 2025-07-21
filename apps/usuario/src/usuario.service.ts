@@ -8,6 +8,7 @@ import { Empresa } from './entities/empresas.entity';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { RoleUsuarios } from './entities/role.enum';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsuarioService {
@@ -19,11 +20,26 @@ export class UsuarioService {
     @InjectDataSource() 
     private dataSource: DataSource,
   ) {}
+async create(dto: CreateUsuarioDto) {
+  const empresa = await this.empresaRepo.findOne({
+    where: { id: dto.empresa_id },
+  });
 
-  async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
-    const usuario = this.usuarioRepository.create(createUsuarioDto);
-    return this.usuarioRepository.save(usuario);
+  if (!empresa) {
+    throw new NotFoundException('Empresa não encontrada');
   }
+
+  const senhaHash = await bcrypt.hash(dto.senha, 10);
+
+  const novoUsuario = this.usuarioRepository.create({
+    ...dto,
+    senha: senhaHash,
+  });
+
+  console.log('Senha a ser salva:', novoUsuario.senha);
+
+  return this.usuarioRepository.save(novoUsuario);
+}
 
   findAll(): Promise<Usuario[]> {
     return this.usuarioRepository.find();
@@ -49,6 +65,11 @@ export class UsuarioService {
     }
   }
 
+  async findByEmail(email: string): Promise<Usuario | null> {
+    return this.usuarioRepository.findOne({ where: { email } });
+  }
+
+
   async createEmpresa(createEmpresaDto: CreateEmpresaDto): Promise<Empresa> {
     const { usuario, ...dadosEmpresa } = createEmpresaDto;
 
@@ -72,9 +93,12 @@ export class UsuarioService {
       
       const empresaSalva = await manager.getRepository(Empresa).save(empresa);
 
+      const senhaHash = await bcrypt.hash(usuario.senha, 10);
+
       const novoUsuario = manager.getRepository(Usuario).create({
         ...usuario,
 
+        senha: senhaHash,
         empresa_id: empresaSalva.id, 
         role: RoleUsuarios.ADMIN,
       });
