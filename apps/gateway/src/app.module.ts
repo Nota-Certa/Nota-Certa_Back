@@ -4,6 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { PagamentoModule } from './pagamento/pagamento.module';
+import { NotasFiscaisModule } from 'apps/notas-fiscais/src/notas-fiscais.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PagamentoModule } from './pagamento/pagamento.module';
     DashboardModule,
     UsuarioModule,
     PagamentoModule,
+    NotasFiscaisModule,
   ],
 })
 export class AppModule {}
