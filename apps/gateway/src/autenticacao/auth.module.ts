@@ -15,7 +15,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     }),
     ClientsModule.register([
       {
-        name: 'USUARIOS_SERVICE',
+        name: 'AUTH_SERVICE',
         transport: Transport.REDIS,
         options: {
           host: process.env.REDIS_HOST || 'redis',
