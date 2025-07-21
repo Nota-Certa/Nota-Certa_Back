@@ -5,7 +5,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { PagamentoModule } from './pagamento/pagamento.module';
 import { AuthModule } from './autenticacao/auth.module';
-import { NotasFiscaisModule } from 'apps/notas-fiscais/src/notas-fiscais.module';
+import { NotasFiscaisModule } from './notas-fiscais/notas-fiscais.module';
 
 @Module({
   imports: [
@@ -29,6 +29,22 @@ import { NotasFiscaisModule } from 'apps/notas-fiscais/src/notas-fiscais.module'
       },
       {
         name: 'PAGAMENTO_SERVICE',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST || 'redis',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+        },
+      },
+      {
+        name: 'NOTAS_FISCAIS_SERVICE',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST || 'redis',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+        },
+      },
+      {
+        name: 'AUTH_SERVICE',
         transport: Transport.REDIS,
         options: {
           host: process.env.REDIS_HOST || 'redis',
