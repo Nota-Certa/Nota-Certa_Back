@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { NotasFiscaisService } from './notas-fiscais.service';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
-import { CreateNotaFiscalDto } from 'apps/notas-fiscais/src/dto/create-nota-fiscal.dto';
+import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { ExportNotaFiscalFormat } from './enums/export-nota-fiscal-format.enum';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ResponseNotaFiscalDto } from './dto/response-nota-fiscal.dto';

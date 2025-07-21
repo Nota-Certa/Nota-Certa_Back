@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { NotasFiscaisController } from 'apps/notas-fiscais/src/notas-fiscais.controller';
-import { NotasFiscaisService } from 'apps/notas-fiscais/src/notas-fiscais.service';
+import { NotasFiscaisController } from './notas-fiscais.gateway';
+import { NotasFiscaisService } from './notas-fiscais.service';
 
 @Module({
   imports: [

@@ -7,7 +7,7 @@ import { LoginDto } from './dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('USUARIOS_SERVICE') private readonly usuariosClient: ClientProxy,
+    @Inject('AUTH_SERVICE') private readonly usuariosClient: ClientProxy,
     private readonly jwtService: JwtService,
   ) {}
 
