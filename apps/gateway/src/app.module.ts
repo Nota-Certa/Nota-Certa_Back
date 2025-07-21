@@ -4,6 +4,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { PagamentoModule } from './pagamento/pagamento.module';
+import { AuthModule } from './autenticacao/auth.module';
 import { NotasFiscaisModule } from './notas-fiscais/notas-fiscais.module';
 
 @Module({
@@ -35,7 +36,15 @@ import { NotasFiscaisModule } from './notas-fiscais/notas-fiscais.module';
         },
       },
       {
-        name: 'NOTAS_FISCAIS_SERVIC',
+        name: 'NOTAS_FISCAIS_SERVICE',
+        transport: Transport.REDIS,
+        options: {
+          host: process.env.REDIS_HOST || 'redis',
+          port: parseInt(process.env.REDIS_PORT || '6379'),
+        },
+      },
+      {
+        name: 'AUTH_SERVICE',
         transport: Transport.REDIS,
         options: {
           host: process.env.REDIS_HOST || 'redis',
@@ -46,6 +55,7 @@ import { NotasFiscaisModule } from './notas-fiscais/notas-fiscais.module';
     DashboardModule,
     UsuarioModule,
     PagamentoModule,
+    AuthModule,
     NotasFiscaisModule,
   ],
 })
