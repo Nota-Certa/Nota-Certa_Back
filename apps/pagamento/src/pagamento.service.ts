@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Assinatura } from './entities/assinaturas.entity';
@@ -29,16 +33,26 @@ export class PagamentoService {
   }
 
   async criarAssinatura(dto: CreateAssinaturaDto) {
-    console.log('Creating subscription with DTO:', dto); // log de debug
-    
+    console.log('Creating subscription with DTO:', dto);
+    const plano = await this.planoRepo.findOne({ where: { id: dto.plano_id } });
+    if (!plano) {
+      throw new BadRequestException('Plano informado não existe');
+    }
+
+    if (new Date(dto.inicio) >= new Date(dto.fim)) {
+      throw new BadRequestException(
+        'Data de início deve ser anterior à data de fim',
+      );
+    }
+
     const assinatura = this.assinaturaRepo.create({
-      plano_id: dto.planoId, // Map planoId to plano_id
+      plano_id: dto.plano_id,
       empresa_id: dto.empresa_id,
       inicio: new Date(dto.inicio),
       fim: new Date(dto.fim),
       ativo: dto.ativo !== undefined ? dto.ativo : true,
     });
-    
+
     console.log('Created entity:', assinatura);
     const result = await this.assinaturaRepo.save(assinatura);
     console.log('Saved subscription:', result);
@@ -52,7 +66,8 @@ export class PagamentoService {
 
   async deletarAssinatura(id: string) {
     const result = await this.assinaturaRepo.delete(id);
-    if (result.affected === 0) throw new NotFoundException('Assinatura não encontrada');
+    if (result.affected === 0)
+      throw new NotFoundException('Assinatura não encontrada');
     return { deletado: true };
   }
 
@@ -79,7 +94,8 @@ export class PagamentoService {
 
   async deletarPlano(id: string) {
     const result = await this.planoRepo.delete(id);
-    if (result.affected === 0) throw new NotFoundException('Plano não encontrado');
+    if (result.affected === 0)
+      throw new NotFoundException('Plano não encontrado');
     return { deletado: true };
   }
 }

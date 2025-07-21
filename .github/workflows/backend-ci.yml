@@ -1,0 +1,86 @@
+name: Backend CI/CD Pipeline
+
+# Quando vai rodar?
+on:
+  # Quando houver push p/ main ou develop
+  push:
+    branches:
+      - develop
+      - main
+  # Quando for aberta PRs para main ou develop
+  pull_request:
+    branches:
+      - develop
+      - main
+
+# Definir o que sera feito no workflow
+jobs:
+  build-and-dockerize-backend:
+    runs-on: ubuntu-latest
+
+    # Usar matrix para rodar os mesmos passos para cada microservico
+    strategy:
+      matrix:
+        app_name:
+          - autenticacao
+          - dashboard
+          - gateway
+          - notas-fiscais
+          - notificacoes
+          - pagamento
+          - usuario
+
+    # Definir sequencia de passos para o job
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependecias
+        run: npm install
+
+      - name: Colocar repository owner em minusculo
+        id: set_lowercase_owner
+        # Use a shell command to convert the repository owner to lowercase
+        run: echo "LOWERCASE_OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Setando Docker Buildx
+        # Configura o Docker Buildx, que é uma ferramenta para construir imagens Docker de forma eficiente e paralela.
+        # Buildx é necessário para construir imagens multi-plataforma e usar recursos avançados de cache.
+        # Sem ela, o build falhou
+        uses: docker/setup-buildx-action@v3
+
+      #- name: Log in to GitHub Container Registry (GHCR)
+        # Loga no GHCR utilizando o token provido pelo GitHub Actions
+        # Prerequisito para dar push em imagens do github.
+      #  uses: docker/login-action@v3
+      #  with:
+      #    registry: ghcr.io
+      #    username: ${{ github.actor }} # Your GitHub username
+      #    password: ${{ secrets.GITHUB_TOKEN }} # GitHub-provided token for authentication
+
+      - name: Fazendo build da imagem do Docker para servico ${{ matrix.app_name }}
+        # Uses the official Docker build-push action to build the Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: . # The build context is the root of your repository
+          file: ./Dockerfile # Path to your Dockerfile
+          # 'push: false' means the image will be built but not pushed to a registry.
+          # Change this to 'true' when you're ready to push images (e.g., to GHCR).
+          push: false
+          # Define the tag for your Docker image.
+          # ghcr.io/${{ github.repository_owner }} is the standard prefix for GHCR.
+          # backend-${{ matrix.app_name }} creates a unique name for each microservice.
+          # ${{ github.sha }} uses the full commit SHA as the tag, ensuring unique images per commit.
+          tags: ghcr.io/${{ env.LOWERCASE_OWNER }}/backend-${{ matrix.app_name }}:${{ github.sha }}
+          # Pass the APP_NAME as a build argument to your Dockerfile
+          build-args: |
+            APP_NAME=${{ matrix.app_name }}
+          # Enable caching for Docker layers using GitHub Actions cache, speeding up builds
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
