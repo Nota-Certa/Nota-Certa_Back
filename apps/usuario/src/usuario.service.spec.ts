@@ -20,14 +20,16 @@ const mockEmpresa: Empresa = {
   id: 'b8d9b1a0-a1b2-c3d4-e5f6-a7b8c9d0e1f3',
   nome_razao_social: 'Empresa de Teste SA',
   cnpj: '12345678000199',
-  created_at: new Date(),
+  criado_em: new Date(),
+  atualizado_em: new Date(),
 };
 
 const mockEmpresa2: Empresa = {
   id: 'c7e8a1b9-d2c3-b4a5-f6e7-d8c9b0a1e2f3',
   nome_razao_social: 'Segunda Empresa de Teste',
   cnpj: '99887766000155',
-  created_at: new Date(),
+  criado_em: new Date(),
+  atualizado_em: new Date(),
 };
 
 const mockEmpresasArray = [mockEmpresa, mockEmpresa2];
@@ -37,11 +39,12 @@ const mockUsuario: Usuario = {
   empresa_id: mockEmpresa.id,
   nome: 'Usuário de Teste',
   email: 'teste@exemplo.com',
-  senha_hash: 'hash_super_secreto',
+  senha: 'hash_super_secreto',
   role: RoleUsuarios.FUNCIONARIO,
   ativo: true,
-  created_at: new Date(),
-  empresa: mockEmpresa, 
+  criado_em: new Date(),
+  empresa: mockEmpresa,
+  atualizado_em: new Date() 
 };
 
 const mockUsuario2: Usuario = {
@@ -49,11 +52,12 @@ const mockUsuario2: Usuario = {
   empresa_id: mockEmpresa2.id,
   nome: 'Usuário de Teste 2',
   email: 'teste2@exemplo.com',
-  senha_hash: 'hash_super_secreto',
+  senha: 'hash_super_secreto',
   role: RoleUsuarios.FUNCIONARIO,
   ativo: true,
-  created_at: new Date(),
-  empresa: mockEmpresa, 
+  criado_em: new Date(),
+  empresa: mockEmpresa,
+  atualizado_em: new Date() 
 };
 
 const mockUsuariosArray = [mockUsuario, mockUsuario2]
@@ -62,7 +66,7 @@ const mockUsuariosArray = [mockUsuario, mockUsuario2]
 const mockCreateUsuarioDto: CreateUsuarioDto = {
   nome: 'Novo Funcionário',
   email: 'novo.funcionario@empresa.com',
-  senha_hash: 'senha_super_secreta_hash',
+  senha: 'senha_super_secreta_hash',
   empresa_id: 'b8d9b1a0-a1b2-c3d4-e5f6-a7b8c9d0e1f3', // ID da nossa mockEmpresa
   role: RoleUsuarios.FUNCIONARIO,
 };
@@ -71,7 +75,8 @@ const mockCreateUsuarioDto: CreateUsuarioDto = {
 const mockUsuarioSalvo: Usuario = {
   id: 'd9e8a7b6-c5d4-b3a2-f1e0-d9c8b7a6f5e4', // Um novo ID gerado pelo banco
   ativo: true,
-  created_at: new Date(),
+  criado_em: new Date(),
+  atualizado_em: new Date(),
   ...mockCreateUsuarioDto, // Inclui todos os campos do DTO
   empresa: mockEmpresa, // Relação pode ser omitida ou mockada
 };
@@ -83,7 +88,7 @@ const mockCreateEmpresaDto: CreateEmpresaDto = {
   usuario: {
     nome: 'Admin da Nova Empresa',
     email: 'admin.novo@empresa.com',
-    senha_hash: 'outra_senha_secreta',
+    senha: 'outra_senha_secreta',
     // Os campos abaixo são adicionados pelo serviço, não pelo DTO
     empresa_id: '',
     role: RoleUsuarios.FUNCIONARIO,
