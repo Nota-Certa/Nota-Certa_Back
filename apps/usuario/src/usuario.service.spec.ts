@@ -172,22 +172,41 @@ describe('UsuarioService', () => {
 
   describe('create', () => {
 
-    it('deve criar e salvar um novo usuário com sucesso', async () => {
-      
-      jest.spyOn(usuarioRepository, 'create').mockReturnValue(mockCreateUsuarioDto as any);
+  it('deve criar e salvar um novo usuário com sucesso', async () => {
+    
+  
+    jest.spyOn(empresaRepository, 'findOne').mockResolvedValue(mockEmpresa);
+    jest.spyOn(usuarioRepository, 'save').mockResolvedValue(mockUsuarioSalvo);
 
-      jest.spyOn(usuarioRepository, 'save').mockResolvedValue(mockUsuarioSalvo);
 
-      const result = await service.create(mockCreateUsuarioDto);
+    const result = await service.create(mockCreateUsuarioDto);
 
-      expect(result).toEqual(mockUsuarioSalvo);
-      expect(result.id).toBeDefined(); 
+    expect(result).toEqual(mockUsuarioSalvo);
+    expect(result.id).toBeDefined(); 
 
-      expect(usuarioRepository.create).toHaveBeenCalledWith(mockCreateUsuarioDto);
-      expect(usuarioRepository.save).toHaveBeenCalledWith(mockCreateUsuarioDto);
-      expect(usuarioRepository.save).toHaveBeenCalledTimes(1);
+    // Verificando se o save foi chamado com os dados corretos (exceto a senha que foi hasheada)
+    expect(usuarioRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        nome: mockCreateUsuarioDto.nome,
+        email: mockCreateUsuarioDto.email,
+        empresa_id: mockCreateUsuarioDto.empresa_id
+      })
+    );
+    expect(usuarioRepository.save).toHaveBeenCalledTimes(1);
+    
+    // Verifique também se a busca da empresa foi chamada corretamente
+    expect(empresaRepository.findOne).toHaveBeenCalledWith({
+        where: { id: mockCreateUsuarioDto.empresa_id },
     });
   });
+
+  it('deve lançar NotFoundException se a empresa não for encontrada', async () => {
+
+    jest.spyOn(empresaRepository, 'findOne').mockResolvedValue(null);
+
+    await expect(service.create(mockCreateUsuarioDto)).rejects.toThrow(NotFoundException);
+  });
+});
 
   describe('findOne', () => {
     it('deve retornar um usuário se ele for encontrado', async () => {
