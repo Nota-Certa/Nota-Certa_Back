@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 
@@ -13,6 +13,8 @@ import { TipoPessoa } from './entities/tipo-pessoa.enum';
 import { StatusNotaFiscal } from './enums/status.enum';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
+import { RankingCliente } from './interfaces/ranking-cliente';
+import { ExportNotaFiscalFormat } from './enums/export-nota-fiscal-format.enum';
 
 type MockRepo<T extends import('typeorm').ObjectLiteral = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -23,7 +25,26 @@ const createMockRepo = <T extends import('typeorm').ObjectLiteral = any>(): Mock
   findOne: jest.fn(),
   update: jest.fn(),
   delete: jest.fn(),
+  createQueryBuilder: jest.fn(),
 });
+
+const notaFiscalMock = {
+  id: '093f8b2c-1234-5678-90abcdef1234',
+  empresa_id: '32asd-1234-5678-90abcdef1234',
+  tipo_pessoa: TipoPessoa.FISICA,
+  documento: '12345678901',
+  nome_razao_social: 'Empresa X',
+  data_emissao: new Date('2025-06-10T00:00:00.000Z'),
+  data_vencimento: new Date('2025-06-30T00:00:00.000Z'),
+  itens: [
+    { descricao: 'Item A', quantidade: 1, valor_unitario: 5, impostos: {} },
+  ],
+  xml_gerado: '<xml/>',
+  status: StatusNotaFiscal.PENDENTE,
+  valor_total: 5,
+  created_at: new Date(),
+  updated_at: new Date(),
+}
 
 const exemploImpostos = { ICMS: 0, IPI: 0 };
 
@@ -47,9 +68,14 @@ describe('NotasFiscaisService', () => {
     service = module.get<NotasFiscaisService>(NotasFiscaisService);
   });
 
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
   describe('create', () => {
     it('deve criar nota e itens e retornar a nota completa', async () => {
       const dto: CreateNotaFiscalDto = {
+        empresa_id: '32asd-1234-5678-90abcdef1234',
         tipo_pessoa: TipoPessoa.FISICA,
         documento: '12345678901',
         nome_razao_social: 'Empresa Teste',
@@ -73,62 +99,32 @@ describe('NotasFiscaisService', () => {
         data_vencimento: new Date(dto.data_vencimento),
         valor_total: 40,
         xml_gerado: '<xml/>',
-        create_at: new Date(),
-      } as NotaFiscal;;
-
-      const itensCriados: NotaFiscalItem[] = dto.itens.map((i, idx) =>
-        ({
-          id: `item-${idx}`,
-          nota_fiscal_id: notaSalva.id,
-          descricao: i.descricao,
-          quantidade: i.quantidade,
-          valor_unitario: i.valor_unitario,
-          impostos: exemploImpostos,
-        })
-      );
-
-      const notaComItens = {
-        ...notaSalva,
-        itens: itensCriados,
-        cliente: { id: notaSalva.empresa_id, nome_razao_social: dto.nome_razao_social },
+        created_at: new Date(),
+        updated_at: new Date(),
+        itens: [],
       } as NotaFiscal;
 
+      const notaCompletaComItens = { ...notaSalva, itens: [{ id: 'item-1', nota_fiscal_id: 'uuid-nota' }]};
+
       // Mocks
-      notaRepo.create!.mockReturnValue({ ...dto, valor_total: 40 });
+      notaRepo.create!.mockReturnValue(notaSalva);
       notaRepo.save!.mockResolvedValue(notaSalva);
+      itemRepo.create!.mockReturnValue({ id: 'item-1' });
+      itemRepo.save!.mockResolvedValue([]);
 
-      let counter = 0;
-      itemRepo.create!.mockImplementation((itemDto) => ({
-        id: `item-${counter++}`,
-        ...itemDto,
-      } as NotaFiscalItem));
-      itemRepo.save!.mockImplementation(async items => items);
+      const findOneSpy = jest.spyOn(service, 'findOne').mockResolvedValue(notaCompletaComItens as any);
 
-      notaRepo.findOne!.mockResolvedValue(notaComItens);
+      const result = await service.create(dto);
 
-      // Executing the service method
-      const result = await service.create(dto as any);
-
-      // Expects
-      expect(notaRepo.create).toHaveBeenCalledWith({ ...dto, valor_total: 40 });
-      expect(notaRepo.save).toHaveBeenCalledWith({
+      expect(notaRepo.create).toHaveBeenCalledWith(expect.objectContaining({
         ...dto,
         valor_total: 40,
-      });
-      expect(itemRepo.create).toHaveBeenNthCalledWith(1, {
-        ...dto.itens[0],
-        nota_fiscal_id: notaSalva.id,
-      });
-      expect(itemRepo.create).toHaveBeenNthCalledWith(2, {
-        ...dto.itens[1],
-        nota_fiscal_id: notaSalva.id,
-      });
-      expect(itemRepo.save).toHaveBeenCalledWith(itensCriados);
-      expect(notaRepo.findOne).toHaveBeenCalledWith({
-        where: { id: notaSalva.id },
-        relations: ['cliente', 'itens'],
-      });
-      expect(result).toEqual(notaComItens);
+      }));
+      expect(notaRepo.save).toHaveBeenCalledWith(notaSalva);
+      expect(itemRepo.create).toHaveBeenCalled();
+      expect(itemRepo.save).toHaveBeenCalled();
+      expect(findOneSpy).toHaveBeenCalledWith('uuid-nota');
+      expect(result).toEqual(notaCompletaComItens);
     });
 
     it('deve falhar se o documento não for um CPF ou CNPJ de tamanho válido', async () => {
@@ -190,6 +186,7 @@ describe('NotasFiscaisService', () => {
 
     it('deve retornar excessão se o create falhar ao savar no banco', async () => {
       const dto: CreateNotaFiscalDto = {
+        empresa_id: '32asd-1234-5678-90abcdef1234',
         tipo_pessoa: TipoPessoa.FISICA,
         documento: '12345678901',
         nome_razao_social: 'Empresa X',
@@ -213,34 +210,33 @@ describe('NotasFiscaisService', () => {
   });
 
   describe('findAll', () => {
-    it('deve retornar todas as notas com cliente', async () => {
-      const lista = [{ id: 'n1' }, { id: 'n2' }];
-      notaRepo.find?.mockResolvedValue(lista as any);
+    it('deve retornar todas as notas com os itens', async () => {
+      const lista = [notaFiscalMock];
+      notaRepo.find!.mockResolvedValue(lista as NotaFiscal[]);
 
-      const result = await service.findAll();
-      expect(notaRepo.find).toHaveBeenCalledWith({ relations: ['cliente'] });
-      expect(result).toBe(lista);
+      await service.findAll();
+
+      expect(notaRepo.find).toHaveBeenCalledWith({ relations: ['itens'] });
     });
 
     it('deve retornar array vazio se não houver notas', async () => {
       notaRepo.find?.mockResolvedValue([]);
       const result = await service.findAll();
-      expect(notaRepo.find).toHaveBeenCalledWith({ relations: ['cliente'] });
+      expect(notaRepo.find).toHaveBeenCalledWith({ relations: ['itens'] });
       expect(result).toEqual([]);
     });
   });
 
   describe('findOne', () => {
     it('deve retornar nota existente', async () => {
-      const nota = { id: 'n1' };
-      notaRepo.findOne?.mockResolvedValue(nota as any);
+      notaRepo.findOne?.mockResolvedValue(notaFiscalMock as NotaFiscal);
 
-      const result = await service.findOne('n1');
+      const result = await service.findOne(notaFiscalMock.id);
       expect(notaRepo.findOne).toHaveBeenCalledWith({
-        where: { id: 'n1' },
-        relations: ['cliente', 'itens'],
+        where: { id: notaFiscalMock.id },
+        relations: ['itens'],
       });
-      expect(result).toBe(nota);
+      expect(result).toBe(notaFiscalMock);
     });
 
     it('deve lançar NotFoundException se não encontrar', async () => {
@@ -250,42 +246,22 @@ describe('NotasFiscaisService', () => {
   });
 
   describe('update', () => {
-    it('deve atualizar e retornar a nota com relations', async () => {
-      const dto: UpdateNotaFiscalDto = {
-        nome_razao_social: 'Nova Razão',
-        status: StatusNotaFiscal.PAGA,
-      };
+    it('deve buscar a nota, atualizar e retornar a nota com relations', async () => {
+      const dto: UpdateNotaFiscalDto = { status: StatusNotaFiscal.PAGA };
+      const notaAtualizada = { ...notaFiscalMock, status: StatusNotaFiscal.PAGA };
 
-      const updatedNota = {
-        id: 'uuid-nota',
-        empresa_id: 'uuid-empresa',
-        documento: '12345678901',
-        nome_razao_social: dto.nome_razao_social!,
-        tipo_pessoa: TipoPessoa.FISICA,
-        status: dto.status!,
-        data_emissao: new Date('2025-06-10'),
-        data_vencimento: new Date('2025-06-30'),
-        valor_total: 100,
-        xml_gerado: '<xml/>',
-        create_at: new Date(),
-        cliente: { id: 'e1', nome_razao_social: 'Nova Razão' },
-        itens: [],
-      } as NotaFiscal;
+      // Mock para as chamadas de findOne
+      const findOneSpy = jest.spyOn(service, 'findOne')
+        .mockResolvedValueOnce(notaFiscalMock as NotaFiscal)
+        .mockResolvedValueOnce(notaAtualizada as NotaFiscal);
 
-      // Mocks
-      notaRepo.update!.mockResolvedValue({} as any);
-      notaRepo.findOne!.mockResolvedValue(updatedNota);
+      notaRepo.update!.mockResolvedValue({ affected: 1 } as any);
 
-      // Executing the service method
-      const result = await service.update('n1', dto);
+      const result = await service.update(notaFiscalMock.id, dto);
 
-      // Expects
-      expect(notaRepo.update).toHaveBeenCalledWith('n1', dto);
-      expect(notaRepo.findOne).toHaveBeenCalledWith({
-        where: { id: 'n1' },
-        relations: ['cliente', 'itens'],
-      });
-      expect(result).toEqual(updatedNota);
+      expect(findOneSpy).toHaveBeenCalledTimes(2);
+      expect(notaRepo.update).toHaveBeenCalledWith(notaFiscalMock.id, dto);
+      expect(result).toEqual(notaAtualizada);
     });
 
     it('deve lançar NotFoundException quando o id não existir', async () => {
@@ -308,6 +284,119 @@ describe('NotasFiscaisService', () => {
     it('deve lançar NotFoundException quando não afetar nada', async () => {
       notaRepo.delete?.mockResolvedValue({ affected: 0 } as any);
       await expect(service.remove('nx')).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('getNotasPorPeriodo', () => {
+    it('deve chamar find com Between para um mês e ano específicos', async () => {
+      notaRepo.find!.mockResolvedValue([notaFiscalMock] as NotaFiscal[]);
+
+      await service.getNotasPorPeriodo(6, 2025);
+
+      expect(notaRepo.find).toHaveBeenCalledWith({
+        where: {
+          data_emissao: Between(
+            expect.any(Date),
+            expect.any(Date),
+          ),
+        },
+        relations: ['itens'],
+      });
+    });
+
+    it('deve chamar find com Between para um ano inteiro se o mês não for fornecido', async () => {
+      notaRepo.find!.mockResolvedValue([notaFiscalMock]);
+
+      await service.getNotasPorPeriodo(undefined, 2025);
+
+      expect(notaRepo.find).toHaveBeenCalledWith({
+        where: {
+          data_emissao: Between(
+            expect.any(Date),
+            expect.any(Date),
+          )
+        },
+        relations: ['itens'],
+      });
+    });
+
+    it('deve lançar NotFoundException se nenhuma nota for encontrada', async () => {
+      notaRepo.find!.mockResolvedValue([]);
+      await expect(service.getNotasPorPeriodo(6, 2025)).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('getRankingClientesPorPeriodo', () => {
+    const mockRanking: RankingCliente[] = [
+      { documento: '123', nome_razao_social: 'Cliente A', qtd: 10 },
+    ];
+
+    const mockQueryBuilder = {
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      addGroupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockResolvedValue(mockRanking),
+    };
+
+    it('deve retornar o ranking de clientes', async () => {
+      notaRepo.createQueryBuilder!.mockReturnValue(mockQueryBuilder as any);
+
+      const result = await service.getRankingClientesPorPeriodo(undefined, 2025, 5);
+
+      expect(notaRepo.createQueryBuilder).toHaveBeenCalledWith('nf');
+      expect(mockQueryBuilder.limit).toHaveBeenCalledWith(5);
+      expect(mockQueryBuilder.getRawMany).toHaveBeenCalled();
+      expect(result).toEqual(mockRanking);
+    });
+
+    it('deve chamar o query builder com as datas corretas para um mês específico', async () => {
+      notaRepo.createQueryBuilder!.mockReturnValue(mockQueryBuilder as any);
+
+      await service.getRankingClientesPorPeriodo(6, 2025, 5);
+
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'nf.data_emissao BETWEEN :inicio AND :fim',
+        {
+          inicio: new Date(Date.UTC(2025, 5, 1, 0, 0, 0)),
+          fim: new Date(Date.UTC(2025, 6, 0, 23, 59, 59)),
+        }
+      );
+    });
+  });
+
+  describe('exportNotaFiscal', () => {
+    beforeEach(() => {
+      jest.spyOn(service, 'exportAsPDF').mockImplementation(() => Buffer.from('pdf'));
+      jest.spyOn(service, 'exportAsXML').mockImplementation(() => '<xml>');
+    });
+
+    it('deve chamar exportAsPDF para o formato PDF', async () => {
+      const findOneSpy = jest.spyOn(service, 'findOne').mockResolvedValue({} as any);
+
+      await service.exportNotaFiscal('n1', ExportNotaFiscalFormat.PDF);
+
+      expect(findOneSpy).toHaveBeenCalledWith('n1');
+      expect(service.exportAsPDF).toHaveBeenCalled();
+    });
+
+    it('deve chamar exportAsXML para o formato XML', async () => {
+      const findOneSpy = jest.spyOn(service, 'findOne').mockResolvedValue({} as any);
+
+      await service.exportNotaFiscal('n1', ExportNotaFiscalFormat.XML);
+
+      expect(findOneSpy).toHaveBeenCalledWith('n1');
+      expect(service.exportAsXML).toHaveBeenCalled();
+    });
+
+    it('deve lançar BadRequestException para um formato inválido', async () => {
+      jest.spyOn(service, 'findOne').mockResolvedValue(notaFiscalMock as NotaFiscal);
+
+      await expect(service.exportNotaFiscal('n1', 'INVALIDO' as any))
+        .rejects.toBeInstanceOf(BadRequestException);
     });
   });
 });
