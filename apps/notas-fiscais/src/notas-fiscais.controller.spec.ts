@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
-
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NotasFiscaisController } from './notas-fiscais.controller';
 import { NotasFiscaisService } from './notas-fiscais.service';
 import { CreateNotaFiscalDto } from './dto/create-nota-fiscal.dto';
 import { UpdateNotaFiscalDto } from './dto/update-nota-fiscal.dto';
-import { TipoPessoa } from './entities/tipo-pessoa.enum';
-import { StatusNotaFiscal } from './enums/status.enum';
+import { ExportNotaFiscalFormat } from './enums/export-nota-fiscal-format.enum';
 
 describe('NotasFiscaisController', () => {
   let controller: NotasFiscaisController;
@@ -19,94 +17,165 @@ describe('NotasFiscaisController', () => {
       findOne: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
+      getNotasPorPeriodo: jest.fn(),
+      getRankingClientesPorPeriodo: jest.fn(),
+      getXmlGerado: jest.fn(),
+      gerarXmlESalvar: jest.fn(),
+      exportNotaFiscal: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [NotasFiscaisController],
-      providers: [
-        { provide: NotasFiscaisService, useValue: service },
-      ],
+      providers: [{ provide: NotasFiscaisService, useValue: service }],
     }).compile();
 
     controller = module.get(NotasFiscaisController);
   });
 
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
   describe('create', () => {
     it('deve chamar service.create e retornar o resultado', async () => {
-      const dto: CreateNotaFiscalDto = {
-        tipo_pessoa: TipoPessoa.FISICA,
-        documento: '12345678901',
-        nome_razao_social: 'Empresa X',
-        status: StatusNotaFiscal.PENDENTE,
-        data_emissao: '2025-06-01T00:00:00.000Z',
-        data_vencimento: '2025-06-30T00:00:00.000Z',
-        itens: [
-          { descricao: 'A', quantidade: 1, valor_unitario: 10, impostos: {} },
-        ],
-      };
-      const mockResult = { id: 'n1', ...dto, valor_total: 10 };
+      const dto = {} as CreateNotaFiscalDto;
+      const mockResult = { id: 'n1' };
       service.create!.mockResolvedValue(mockResult);
 
       await expect(controller.create(dto)).resolves.toEqual(mockResult);
       expect(service.create).toHaveBeenCalledWith(dto);
     });
 
-    it('deve propagar erro do service.create', async () => {
+    it('deve lançar BadRequestException se o dto for inválido', async () => {
       const dto = {} as CreateNotaFiscalDto;
-      service.create!.mockRejectedValue(new Error('fail'));
-      await expect(controller.create(dto)).rejects.toThrow('fail');
+      service.create!.mockRejectedValue(new BadRequestException('Dados inválidos'));
+      await expect(controller.create(dto)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('findAll', () => {
-    it('deve chamar service.findAll e retornar lista', async () => {
-      const lista = [{ id: 'n1' }, { id: 'n2' }];
-      service.findAll!.mockResolvedValue(lista);
-      await expect(controller.findAll()).resolves.toBe(lista);
+    it('deve retornar todas as notas fiscais', async () => {
+      const notas = [{ id: 'n1', itens: [] }];
+      service.findAll!.mockResolvedValue(notas);
+      await expect(controller.findAll()).resolves.toEqual(notas);
+      expect(service.findAll).toHaveBeenCalled();
+    });
+
+    it('deve retornar uma lista vazia se não houver notas', async () => {
+      service.findAll!.mockResolvedValue([]);
+      await expect(controller.findAll()).resolves.toEqual([]);
       expect(service.findAll).toHaveBeenCalled();
     });
   });
 
   describe('findOne', () => {
-    it('deve chamar service.findOne com id correto', async () => {
-      const nota = { id: 'abc' };
+    it('deve retornar a nota fiscal encontrada', async () => {
+      const nota = { id: 'n1', itens: [] };
       service.findOne!.mockResolvedValue(nota);
-      await expect(controller.findOne('abc')).resolves.toBe(nota);
-      expect(service.findOne).toHaveBeenCalledWith('abc');
+      await expect(controller.findOne('n1')).resolves.toEqual(nota);
+      expect(service.findOne).toHaveBeenCalledWith('n1');
     });
 
-    it('deve propagar NotFoundException', async () => {
-      service.findOne!.mockRejectedValue(new NotFoundException());
-      await expect(controller.findOne('xyz')).rejects.toBeInstanceOf(NotFoundException);
+    it('deve lançar NotFoundException se a nota não for encontrada', async () => {
+      service.findOne!.mockRejectedValue(new NotFoundException('Nota não encontrada'));
+      await expect(controller.findOne('invalid-id')).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('update', () => {
-    it('deve chamar service.update e devolver o retorno', async () => {
-      const dto: UpdateNotaFiscalDto = { nome_razao_social: 'Nova' };
-      const updated = { id: 'u1', nome_razao_social: 'Nova' };
-      service.update!.mockResolvedValue(updated);
+    it('deve chamar service.update com o id e dto corretos', async () => {
+      const dto = {} as UpdateNotaFiscalDto;
+      const updatedNota = { id: 'n1', ...dto };
+      service.update!.mockResolvedValue(updatedNota);
 
-      await expect(controller.update('u1', dto)).resolves.toEqual(updated);
-      expect(service.update).toHaveBeenCalledWith('u1', dto);
+      await expect(controller.update('n1', dto)).resolves.toEqual(updatedNota);
+      expect(service.update).toHaveBeenCalledWith('n1', dto);
     });
 
-    it('deve propagar erro do service.update', async () => {
-      service.update!.mockRejectedValue(new Error('update error'));
-      await expect(controller.update('u1', {} as any)).rejects.toThrow('update error');
+    it('deve lançar NotFoundException se a nota não for encontrada', async () => {
+      service.update!.mockRejectedValue(new NotFoundException('Nota não encontrada'));
+      await expect(controller.update('invalid-id', {} as UpdateNotaFiscalDto)).rejects.toThrow(NotFoundException);
+    });
+
+    it('deve lançar BadRequestException se o dto for inválido', async () => {
+      const dto = {} as UpdateNotaFiscalDto;
+      service.update!.mockRejectedValue(new BadRequestException('Dados inválidos'));
+      await expect(controller.update('n1', dto)).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('remove', () => {
-    it('deve chamar service.remove e devolver {deleted:true}', async () => {
+    it('deve chamar service.remove com o id do payload', async () => {
       service.remove!.mockResolvedValue({ deleted: true });
       await expect(controller.remove('r1')).resolves.toEqual({ deleted: true });
       expect(service.remove).toHaveBeenCalledWith('r1');
     });
 
-    it('deve propagar NotFoundException de service.remove', async () => {
-      service.remove!.mockRejectedValue(new NotFoundException());
-      await expect(controller.remove('r1')).rejects.toBeInstanceOf(NotFoundException);
+    it('deve lançar NotFoundException se a nota não existir', async () => {
+      service.remove!.mockRejectedValue(new NotFoundException('Nota não encontrada'));
+      await expect(controller.remove('invalid-id')).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getNotasPorPeriodo', () => {
+    it('deve chamar o service com o ano atual se nenhum for fornecido', async () => {
+      const currentYear = new Date().getFullYear();
+      await controller.getNotasPorPeriodo(undefined, undefined);
+      expect(service.getNotasPorPeriodo).toHaveBeenCalledWith(undefined, currentYear);
+    });
+
+    it('deve chamar o service com o mês e ano fornecidos', async () => {
+      await controller.getNotasPorPeriodo(6, 2025);
+      expect(service.getNotasPorPeriodo).toHaveBeenCalledWith(6, 2025);
+    });
+
+    it('deve lançar BadRequestException se o mês for fornecido sem o ano', () => {
+      expect(() => controller.getNotasPorPeriodo(6, undefined)).toThrow(BadRequestException);
+    });
+
+    it('deve lançar BadRequestException se o mês for inválido', () => {
+      expect(() => controller.getNotasPorPeriodo(13, 2025)).toThrow(BadRequestException);
+    });
+  });
+
+  describe('getRankingClientes', () => {
+    it('deve chamar o service com valores padrão para ano e top', async () => {
+      const currentYear = new Date().getFullYear();
+      await controller.getRankingClientes(undefined, undefined, undefined);
+      expect(service.getRankingClientesPorPeriodo).toHaveBeenCalledWith(undefined, currentYear, 10);
+    });
+
+    it('deve lançar BadRequestException se top for inválido', () => {
+      expect(() => controller.getRankingClientes(undefined, 2025, 101)).toThrow(BadRequestException);
+    });
+  });
+
+  describe('downloadXml', () => {
+    it('deve chamar service.getXmlGerado', async () => {
+      service.getXmlGerado!.mockResolvedValue('<xml>');
+      await expect(controller.downloadXml('n1')).resolves.toBe('<xml>');
+      expect(service.getXmlGerado).toHaveBeenCalledWith('n1');
+    });
+  });
+
+  describe('exportNotaFiscal', () => {
+    it('deve chamar service.exportNotaFiscal e retornar um Buffer para XML', async () => {
+      service.exportNotaFiscal!.mockResolvedValue('<xml>');
+      const result = await controller.exportNotaFiscal('n1', 'XML');
+      expect(service.exportNotaFiscal).toHaveBeenCalledWith('n1', ExportNotaFiscalFormat.XML);
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    it('deve chamar service.exportNotaFiscal e retornar um Buffer para PDF', async () => {
+      const pdfBuffer = Buffer.from('pdf content');
+      service.exportNotaFiscal!.mockResolvedValue(pdfBuffer);
+      const result = await controller.exportNotaFiscal('n1', 'PDF');
+      expect(service.exportNotaFiscal).toHaveBeenCalledWith('n1', ExportNotaFiscalFormat.PDF);
+      expect(result).toBe(pdfBuffer);
+    });
+
+    it('deve lançar BadRequestException para um formato não suportado', async () => {
+      await expect(controller.exportNotaFiscal('n1', 'INVALIDO')).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 });
