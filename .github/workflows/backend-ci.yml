@@ -44,9 +44,6 @@ jobs:
       - name: Instalar dependecias
         run: npm install
 
-      - name: Run Jest tests for ${{ matrix.app_name }}
-        run: 'npm run test:${{ matrix.app_name }} -- --passWithNoTests'
-
       - name: Colocar repository owner em minusculo
         id: set_lowercase_owner
         # Use a shell command to convert the repository owner to lowercase
@@ -87,3 +84,32 @@ jobs:
           # Enable caching for Docker layers using GitHub Actions cache, speeding up builds
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  run-tests:
+    name: Rodar testes para ${{ matrix.app_name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_name: # ADICIONAR AQUI SERVIÇOS COM TESTES
+          - autenticacao
+          - notas-fiscais
+          - notificacoes
+          - pagamento
+          - usuario
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Rodando testes Jest para ${{ matrix.app_name }}
+        run:
+          npm run test:${{ matrix.app_name }}
