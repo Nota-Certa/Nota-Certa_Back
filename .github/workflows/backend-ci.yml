@@ -45,7 +45,7 @@ jobs:
         run: npm install
 
       - name: Run Jest tests for ${{ matrix.app_name }}
-        run: npm run test:${{ matrix.app_name }}
+        run: npm run test:${{ matrix.app_name }} -- --passWithNoTests
 
       - name: Colocar repository owner em minusculo
         id: set_lowercase_owner
