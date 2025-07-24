@@ -44,6 +44,9 @@ jobs:
       - name: Instalar dependecias
         run: npm install
 
+      - name: Run Jest tests for ${{ matrix.app_name }}
+        run: npm run test:${{ matrix.app_name }}
+
       - name: Colocar repository owner em minusculo
         id: set_lowercase_owner
         # Use a shell command to convert the repository owner to lowercase
