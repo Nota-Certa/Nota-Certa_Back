@@ -60,7 +60,7 @@ async create(dto: CreateUsuarioDto) {
       throw new NotFoundException(`Usuário com id ${id} não encontrado`);
     }
 
-    const usuarioAtualizado = await this.usuarioRepository.findOneBy({ id });
+    const usuarioAtualizado = await this.usuarioRepository.findOne({ where: { id } });
     if (!usuarioAtualizado) {
       throw new NotFoundException(`Usuário com id ${id} não encontrado`);
     }
@@ -136,7 +136,7 @@ async create(dto: CreateUsuarioDto) {
       throw new NotFoundException(`Empresa com id ${id} não encontrado`);
     }
 
-    const empresaAtualizada = await this.empresaRepo.findOneBy({ id });
+    const empresaAtualizada = await this.empresaRepo.findOne({ where: { id } });
     if (!empresaAtualizada) {
       throw new NotFoundException(`Empresa com id ${id} não encontrada`);
     }
