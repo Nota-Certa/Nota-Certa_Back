@@ -64,9 +64,15 @@ export class UsuarioMessageController {
   @MessagePattern('user.validate')
   async validarUsuario(@Payload() data: { email: string; senha: string }) {
   const user = await this.usuarioService.findByEmail(data.email);
+
+  
+  if (!user || !user.senha) {
+    return null;
+  }
+
   const senhaCorreta = await bcrypt.compare(data.senha, user?.senha);
 
-  if (!user || !senhaCorreta) {
+  if (!senhaCorreta) {
     return null;
   }
 
