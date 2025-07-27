@@ -92,7 +92,7 @@ export class NotasFiscaisController {
   }
 
   // Rotas para Planos
-  @Get('notas/periodo')
+  @Get('/periodo')
   @ApiTags('Notas-Fiscais')
   @ApiOperation({ summary: 'Lista as notas fiscais de um período' })
   @ApiResponse({
@@ -104,7 +104,7 @@ export class NotasFiscaisController {
     return this.notasFiscaisService.buscarNotasPorPeriodo(mes, ano);
   }
 
-  @Get('notas/ranking')
+  @Get('/ranking')
   @ApiTags('Notas-Fiscais')
   @ApiOperation({ summary: 'Lista as notas fiscais por ranking' })
   @ApiResponse({
@@ -140,7 +140,7 @@ export class NotasFiscaisController {
     return this.notasFiscaisService.gerarXML(id);
   }
 
-  @Get('notas/exportar/:id')
+  @Get('/exportar/:id')
   @ApiOperation({ summary: 'Exporta uma nota fiscal a partir de um ID' })
   @ApiResponse({
     status: 200,
