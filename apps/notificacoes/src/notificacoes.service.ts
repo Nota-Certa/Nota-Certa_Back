@@ -29,13 +29,15 @@ export class NotificacoesService {
   }
 
   async atualizar(id: string, dto: UpdateNotificacaoDto) {
-    await this.repo.update(id, dto);
-    return this.buscarUm(id);
+    const notificacao = await this.buscarUm(id); // já lança NotFoundException se não existir
+    Object.assign(notificacao, dto);
+    return this.repo.save(notificacao);
   }
 
   async remover(id: string) {
     const res = await this.repo.delete(id);
-    if (!res.affected) throw new NotFoundException('Notificação não encontrada');
+    if (!res.affected)
+      throw new NotFoundException('Notificação não encontrada');
     return { deletado: true };
   }
 }

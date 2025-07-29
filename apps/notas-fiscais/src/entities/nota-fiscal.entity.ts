@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { StatusNotaFiscal } from './status.enum';
+import { StatusNotaFiscal } from '../enums/status.enum';
 import { TipoPessoa } from './tipo-pessoa.enum';
 import { NotaFiscalItem } from './nota-fiscal-itens.entity';
 

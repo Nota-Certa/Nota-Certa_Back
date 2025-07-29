@@ -39,7 +39,8 @@ export class CreateNotificacoesTable1650000000000 implements MigrationInterface 
           },
           {
             name: 'nota_fiscal_id',
-            type: 'uuid'
+            type: 'uuid',
+            isNullable: true
           },
           {
             name: 'cliente_id',

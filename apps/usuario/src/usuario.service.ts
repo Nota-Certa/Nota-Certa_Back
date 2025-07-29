@@ -8,6 +8,7 @@ import { Empresa } from './entities/empresas.entity';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { RoleUsuarios } from './entities/role.enum';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsuarioService {
@@ -16,14 +17,29 @@ export class UsuarioService {
     private usuarioRepository: Repository<Usuario>,
     @InjectRepository(Empresa)
     private empresaRepo: Repository<Empresa>,
-    @InjectDataSource() 
+    @InjectDataSource()
     private dataSource: DataSource,
   ) {}
+async create(dto: CreateUsuarioDto) {
+  const empresa = await this.empresaRepo.findOne({
+    where: { id: dto.empresa_id },
+  });
 
-  async create(createUsuarioDto: CreateUsuarioDto): Promise<Usuario> {
-    const usuario = this.usuarioRepository.create(createUsuarioDto);
-    return this.usuarioRepository.save(usuario);
+  if (!empresa) {
+    throw new NotFoundException('Empresa não encontrada');
   }
+
+  const senhaHash = await bcrypt.hash(dto.senha, 10);
+
+  const novoUsuario = this.usuarioRepository.create({
+    ...dto,
+    senha: senhaHash,
+  });
+
+  console.log('Senha a ser salva:', novoUsuario.senha);
+
+  return this.usuarioRepository.save(novoUsuario);
+}
 
   findAll(): Promise<Usuario[]> {
     return this.usuarioRepository.find();
@@ -38,8 +54,17 @@ export class UsuarioService {
   }
 
   async update(id: string, updateUsuarioDto: UpdateUsuarioDto): Promise<Usuario> {
-    await this.usuarioRepository.update(id, updateUsuarioDto);
-    return this.findOne(id);
+    const result = await this.usuarioRepository.update(id, updateUsuarioDto);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Usuário com id ${id} não encontrado`);
+    }
+
+    const usuarioAtualizado = await this.usuarioRepository.findOne({ where: { id } });
+    if (!usuarioAtualizado) {
+      throw new NotFoundException(`Usuário com id ${id} não encontrado`);
+    }
+    return usuarioAtualizado;
   }
 
   async remove(id: string): Promise<void> {
@@ -48,6 +73,11 @@ export class UsuarioService {
       throw new NotFoundException(`Usuário com id ${id} não encontrado`);
     }
   }
+
+  async findByEmail(email: string): Promise<Usuario | null> {
+    return this.usuarioRepository.findOne({ where: { email } });
+  }
+
 
   async createEmpresa(createEmpresaDto: CreateEmpresaDto): Promise<Empresa> {
     const { usuario, ...dadosEmpresa } = createEmpresaDto;
@@ -69,12 +99,15 @@ export class UsuarioService {
       }
 
       const empresa = manager.getRepository(Empresa).create(dadosEmpresa);
-      
+
       const empresaSalva = await manager.getRepository(Empresa).save(empresa);
+
+      const senhaHash = await bcrypt.hash(usuario.senha, 10);
 
       const novoUsuario = manager.getRepository(Usuario).create({
         ...usuario,
 
+        senha: senhaHash,
         empresa_id: empresaSalva.id, 
         role: RoleUsuarios.ADMIN,
       });
@@ -97,8 +130,17 @@ export class UsuarioService {
   }
 
   async updateEmpresa(id: string, updateEmpresaDto: UpdateEmpresaDto): Promise<Empresa> {
-    await this.empresaRepo.update(id, updateEmpresaDto);
-    return this.findOneEmpresa(id);
+    const result = await this.empresaRepo.update(id, updateEmpresaDto);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Empresa com id ${id} não encontrado`);
+    }
+
+    const empresaAtualizada = await this.empresaRepo.findOne({ where: { id } });
+    if (!empresaAtualizada) {
+      throw new NotFoundException(`Empresa com id ${id} não encontrada`);
+    }
+    return empresaAtualizada;
   }
 
   async removeEmpresa(id: string): Promise<void> {
